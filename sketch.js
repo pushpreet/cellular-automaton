@@ -35,8 +35,8 @@ function setup() {
     _right = 0 + canvasSizeX/2;
     _bottom = 0 + canvasSizeY/2;
     
-    let scale = ((((canvasSizeX - mainWindowPadding)/plotSizeX) < ((canvasSizeY - mainWindowPadding)/plotSizeY)) ? 
-                ((canvasSizeX - mainWindowPadding)/plotSizeX) : ((canvasSizeY - mainWindowPadding)/plotSizeY));
+    let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
+                ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
 
     scaledPlotSizeX = plotSizeX * scale;
     scaledPlotSizeY = plotSizeY * scale;
@@ -70,6 +70,7 @@ function windowResized() {
 
     resizeCanvas(canvasSizeX, canvasSizeY);
 
+    mainWindowPadding = canvasSizeY/10;
     leftMenuWidth = canvasSizeX/6;
     _top = 0 - canvasSizeY/2;
     _left = 0 - canvasSizeX/2 + leftMenuWidth;
@@ -111,19 +112,35 @@ function drawGrid(grid) {
     stroke('#7f8c8d');
     strokeWeight(2);
         
-    for (let i = 0; i < cols; i++) {
+    for (let i = 0; i < cols + 1; i++) {
         let x = i * scaledUnitSize;
 
-        line((_left + _right)/2 - scaledPlotSizeX/2 + x, _top + mainWindowPadding/2, 
-                (_left + _right)/2 - scaledPlotSizeX/2 + x, _bottom - mainWindowPadding/2);
+        line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
+                (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
     }
 
-    for (let j = 0; j < rows; j++) {
+    for (let j = 0; j < rows + 1; j++) {
         let y = j * scaledUnitSize;
 
-        line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, _top + mainWindowPadding + y, 
-                (_left + _right)/2 + scaledPlotSizeX/2 - mainWindowPadding/2, _top + mainWindowPadding + y);
+        line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
+                (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
     }
+
+    // for (let i = 0; i < cols; i++) {
+    //     for (let j = 0; j < rows; j++) {
+    //         let x = i * scaledUnitSize;
+    //         let y = j * scaledUnitSize;
+
+    //         if (grid[i][j] == 0) {
+    //             fill(0);
+    //         }
+    //         else {
+    //             fill(255);
+    //         }
+
+    //         rect(x - canvasSizeX/2, y - canvasSizeY/2 + mainWindowPadding/2, scaledUnitSize-1, scaledUnitSize - 1);
+    //     }
+    // }
 
     //translate(0, 0, 0);
     //fill(255);
