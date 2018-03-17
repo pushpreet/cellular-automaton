@@ -8,6 +8,7 @@ let _top;
 let _left;
 let _right;
 let _bottom;
+let gridTopLeftPoint;
 
 let canvasSizeX;
 let canvasSizeY;
@@ -42,6 +43,10 @@ function setup() {
     scaledPlotSizeY = plotSizeY * scale;
     scaledUnitSize = unitSize * scale;
 
+    gridTopLeftPoint = createVector((_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+                                    (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+                                     + scaledUnitSize/2);
+
     rows = plotSizeX / unitSize;
     cols = plotSizeY / unitSize;
 
@@ -54,13 +59,17 @@ function setup() {
         }
     }
 
-    frameRate(6);
+    //frameRate(6);
 }
 
 function draw() {
+    //rotate(0, 0, 0);
     drawUI();
 
-    drawGrid(grid);
+
+
+    drawGrid();
+    drawLayer(grid, 0);
     //grid = computeNextGeneration(grid);
 }
 
@@ -76,21 +85,10 @@ function windowResized() {
     _left = 0 - canvasSizeX/2 + leftMenuWidth;
     _right = 0 + canvasSizeX/2;
     _bottom = 0 + canvasSizeY/2;
-}
 
-function make2DArray(cols, rows) {
-    let arr = new Array(cols);
-    for (let i = 0; i < arr.length; i++) {
-        arr[i] = new Array(rows);
-    }
-
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            arr[i][j] = 0;
-        }
-    }
-    
-    return arr;
+    gridTopLeftPoint = set((_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+                                    (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+                                     + scaledUnitSize/2);
 }
 
 function drawUI() {
@@ -108,7 +106,7 @@ function drawUI() {
     rect(0 - canvasSizeX/2, 0 - canvasSizeY/2, leftMenuWidth, canvasSizeY);
 }
 
-function drawGrid(grid) {
+function drawGrid() {
     stroke('#7f8c8d');
     strokeWeight(2);
         
@@ -145,6 +143,38 @@ function drawGrid(grid) {
     //translate(0, 0, 0);
     //fill(255);
     //box(scaledUnitSize - 1, scaledUnitSize - 1, scaledUnitSize - 1);
+}
+
+function drawLayer(layer, zOffset) {
+    translate(gridTopLeftPoint.x, gridTopLeftPoint.y, gridTopLeftPoint.z + (scaledUnitSize * zOffset));
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            if (layer[i][j] == 1) {
+                fill ('#16a085');    
+                box(scaledUnitSize);
+            }
+            translate(scaledUnitSize, 0, 0);
+        }
+        translate(-rows * scaledUnitSize, scaledUnitSize, 0);
+    }
+
+    //console.table(layer);
+}
+
+function make2DArray(cols, rows) {
+    let arr = new Array(cols);
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] = new Array(rows);
+    }
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            arr[i][j] = 0;
+        }
+    }
+    
+    return arr;
 }
 
 function computeNextGeneration(grid) {
