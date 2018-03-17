@@ -1,6 +1,6 @@
 let plotSizeX = 1000;
 let plotSizeY = 1000;
-let unitSize = 100;
+let unitSize = 10;
 
 let mainWindowPadding;
 let leftMenuWidth;
@@ -59,18 +59,17 @@ function setup() {
         }
     }
 
-    //frameRate(6);
+    frameRate(12);
 }
 
 function draw() {
-    //rotate(0, 0, 0);
     drawUI();
-
-
-
+    ortho();
+    setLights();
+    //setCamera();
     drawGrid();
     drawLayer(grid, 0);
-    //grid = computeNextGeneration(grid);
+    grid = computeNextGeneration(grid);
 }
 
 function windowResized() {
@@ -106,6 +105,19 @@ function drawUI() {
     rect(0 - canvasSizeX/2, 0 - canvasSizeY/2, leftMenuWidth, canvasSizeY);
 }
 
+function setLights() {
+    pointLight(255, 255, 255, _left, 0, 1000);
+}
+
+function setCamera() {
+    //lastCameraPosition
+    if (mouseIsPressed) {
+        let camX = map(mouseX, 0, width, 500, -500);
+        let camY = map(mouseY, 0, width, 500, -500);
+        camera(camX, camY, (height/2) / (tan(PI/6)), 0, 0, 0, 0, 1, 0);
+    }
+}
+
 function drawGrid() {
     stroke('#7f8c8d');
     strokeWeight(2);
@@ -123,26 +135,6 @@ function drawGrid() {
         line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
                 (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
     }
-
-    // for (let i = 0; i < cols; i++) {
-    //     for (let j = 0; j < rows; j++) {
-    //         let x = i * scaledUnitSize;
-    //         let y = j * scaledUnitSize;
-
-    //         if (grid[i][j] == 0) {
-    //             fill(0);
-    //         }
-    //         else {
-    //             fill(255);
-    //         }
-
-    //         rect(x - canvasSizeX/2, y - canvasSizeY/2 + mainWindowPadding/2, scaledUnitSize-1, scaledUnitSize - 1);
-    //     }
-    // }
-
-    //translate(0, 0, 0);
-    //fill(255);
-    //box(scaledUnitSize - 1, scaledUnitSize - 1, scaledUnitSize - 1);
 }
 
 function drawLayer(layer, zOffset) {
@@ -151,7 +143,7 @@ function drawLayer(layer, zOffset) {
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
             if (layer[i][j] == 1) {
-                fill ('#16a085');    
+                ambientMaterial('#16a085')
                 box(scaledUnitSize);
             }
             translate(scaledUnitSize, 0, 0);
