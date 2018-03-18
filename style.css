@@ -16,6 +16,8 @@ html, body {
 }
 
 #menu {
+	padding-top: 15px;
+	padding-bottom: 15px;
 	background: #2c3e50;
 }
 
