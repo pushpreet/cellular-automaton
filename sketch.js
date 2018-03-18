@@ -1,9 +1,8 @@
 let plotSizeX = 1000;
 let plotSizeY = 1000;
-let unitSize = 10;
+let unitSize = 100;
 
 let mainWindowPadding;
-let leftMenuWidth;
 let _top;
 let _left;
 let _right;
@@ -23,16 +22,22 @@ let cols;
 let grid;
 let oldGrid;
 
-function setup() {
-    canvasSizeX = windowWidth - 15;
-    canvasSizeY = windowHeight - 15;
+var mainWindow;
+var canvas;
 
-    createCanvas(canvasSizeX, canvasSizeY, WEBGL);
+function setup() {
+    mainWindow = document.getElementById('main-window');
+    canvasSizeX = mainWindow.clientWidth;
+    canvasSizeY = mainWindow.clientHeight;
+
+    canvas = createCanvas(canvasSizeX, canvasSizeY, WEBGL);
+    canvas.style('display', 'block');
+    canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
+    canvas.parent('main-window');
 
     mainWindowPadding = canvasSizeY/10;
-    leftMenuWidth = canvasSizeX/6;
     _top = 0 - canvasSizeY/2;
-    _left = 0 - canvasSizeX/2 + leftMenuWidth;
+    _left = 0 - canvasSizeX/2;
     _right = 0 + canvasSizeX/2;
     _bottom = 0 + canvasSizeY/2;
     
@@ -64,24 +69,23 @@ function setup() {
 
 function draw() {
     drawUI();
-    ortho();
+    //ortho();
     setLights();
-    //setCamera();
+    setCamera();
     drawGrid();
     drawLayer(grid, 0);
     grid = computeNextGeneration(grid);
 }
 
 function windowResized() {
-    canvasSizeX = windowWidth - 15;
-    canvasSizeY = windowHeight - 15;
+    canvasSizeX = mainWindow.clientWidth;
+    canvasSizeY = mainWindow.clientHeight;
 
     resizeCanvas(canvasSizeX, canvasSizeY);
 
     mainWindowPadding = canvasSizeY/10;
-    leftMenuWidth = canvasSizeX/6;
     _top = 0 - canvasSizeY/2;
-    _left = 0 - canvasSizeX/2 + leftMenuWidth;
+    _left = 0 - canvasSizeX/2;
     _right = 0 + canvasSizeX/2;
     _bottom = 0 + canvasSizeY/2;
 
@@ -91,18 +95,8 @@ function windowResized() {
 }
 
 function drawUI() {
-    // set backgroung color
+    // set background color
     background('#34495e');
-
-    // draw the left line separator
-    stroke(0);
-    strokeWeight(5);
-    line(_left, _top, _left, _bottom);
-
-    // make the left pane a darker color
-    noStroke();
-    fill('#2c3e50');
-    rect(0 - canvasSizeX/2, 0 - canvasSizeY/2, leftMenuWidth, canvasSizeY);
 }
 
 function setLights() {
