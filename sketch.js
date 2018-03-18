@@ -25,6 +25,12 @@ let oldGrid;
 var mainWindow;
 var canvas;
 
+let cameraState;
+
+let renderType = '3D';
+
+let zoomSensitivity = 2;
+
 function setup() {
     mainWindow = document.getElementById('main-window');
     canvasSizeX = mainWindow.clientWidth;
@@ -34,6 +40,8 @@ function setup() {
     canvas.style('display', 'block');
     canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
     canvas.parent('main-window');
+
+    canvas.mouseWheel(setZoom);
 
     mainWindowPadding = canvasSizeY/10;
     _top = 0 - canvasSizeY/2;
@@ -48,15 +56,29 @@ function setup() {
     scaledPlotSizeY = plotSizeY * scale;
     scaledUnitSize = unitSize * scale;
 
-    gridTopLeftPoint = createVector((_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-                                    (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-                                     + scaledUnitSize/2);
+    gridTopLeftPoint = createVector(
+        (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+        (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+        scaledUnitSize/2
+    );
 
     rows = plotSizeX / unitSize;
     cols = plotSizeY / unitSize;
 
     grid = make2DArray(cols, rows);
     oldGrid = make2DArray(cols, rows);
+
+    cameraState = {
+        posX: 0,
+        posY: 0,
+        posZ: (height/2) / (tan(PI/6)),
+        centerX: 0,
+        centerY: 0,
+        centerZ: 0,
+        upX: 0,
+        upY: 1,
+        upZ: 0
+    }
 
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
@@ -69,7 +91,6 @@ function setup() {
 
 function draw() {
     drawUI();
-    //ortho();
     setLights();
     setCamera();
     drawGrid();
@@ -89,9 +110,11 @@ function windowResized() {
     _right = 0 + canvasSizeX/2;
     _bottom = 0 + canvasSizeY/2;
 
-    gridTopLeftPoint = set((_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-                                    (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-                                     + scaledUnitSize/2);
+    gridTopLeftPoint = set(
+        (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+        (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+        scaledUnitSize/2
+    );
 }
 
 function drawUI() {
@@ -103,13 +126,30 @@ function setLights() {
     pointLight(255, 255, 255, _left, 0, 1000);
 }
 
-function setCamera() {
-    //lastCameraPosition
+function todo() {
     if (mouseIsPressed) {
-        let camX = map(mouseX, 0, width, 500, -500);
-        let camY = map(mouseY, 0, width, 500, -500);
-        camera(camX, camY, (height/2) / (tan(PI/6)), 0, 0, 0, 0, 1, 0);
+        let intialMouseX = mouseX;
+        let intialMouseY = mouseY;
+
+        let camX = map(mouseX - intialMouseX, 0, width, 500, -500);
+        let camY = map(mouseY - intialMouseY, 0, width, 500, -500);
+
+        cameraState.posX += camX;
+        cameraState.posY += camY;
     }
+}
+
+function setCamera() {
+    camera(
+        cameraState.posX, cameraState.posY, cameraState.posZ,
+        cameraState.centerX, cameraState.centerY, cameraState.centerZ,
+        cameraState.upX, cameraState.upY, cameraState.upZ
+    );
+}
+
+function setZoom(event) {
+    cameraState.posZ += zoomSensitivity * float(event.deltaY);
+    setCamera();
 }
 
 function drawGrid() {
