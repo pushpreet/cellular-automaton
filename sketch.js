@@ -30,6 +30,44 @@ var generationTimer;
 
 var generations = [];
 
+var cellTypes = {
+    0: {
+        name: 'empty',
+        color: '',
+        unit: 0
+    },
+
+    1: {
+        name: 'binary',
+        color: '#16a085',
+        unit: 1
+    },
+
+    2: {
+        name: 'residential-basic',
+        color: '#1abc9c',
+        unit: 9
+    },
+
+    3: {
+        name: 'residential-core',
+        color: '#16a085',
+        unit: 9
+    },
+
+    4: {
+        name: 'office-basic',
+        color: '#e67e22',
+        unit: 18
+    },
+
+    5: {
+        name: 'offic-core',
+        color: '#d35400',
+        unit: 18
+    }
+};
+
 function setup() {
     pixelDensity(1);
 
@@ -47,8 +85,8 @@ function setup() {
 
     easycam = createEasyCam(
         {
-            distance: 1000, 
-            center: [0, 0, 0], 
+            distance: 1200, 
+            center: [0, 0, 300], 
             rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303]
         }
     );
@@ -118,11 +156,19 @@ function setInitialGeneration(cols, rows) {
     generations.length = 0;
     generations.push(make2DArray(cols, rows));
 
+    //random for testing
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
             generations[0][i][j] = floor(random(2));
         }
     }
+
+    //random with types
+    // for (let i = 0; i < cols; i++) {
+    //     for (let j = 0; j < rows; j++) {
+    //         generations[0][i][j] = floor(random(Object.keys(cellTypes).length));
+    //     }
+    // }
 }
 
 function drawUI() {
@@ -135,6 +181,8 @@ function setLights() {
     pointLight(255, 255, 255, 2*_right, 2*_top, 500);
     pointLight(255, 255, 255, 2*_right, 2*_bottom, 500);
     pointLight(255, 255, 255, 2*_left, 2*_bottom, 500);
+
+    pointLight(255, 255, 255, 0, 0, 15000);
 }
 
 function drawGrid() {
@@ -165,8 +213,8 @@ function drawLayers(generations, layerStart, layerEnd) {
     for (let layer = layerStart; layer < layerEnd; layer++) {
         for (let i = 0; i < cols; i++) {
             for (let j = 0; j < rows; j++) {
-                if (generations[layer][i][j] == 1) {
-                    ambientMaterial('#16a085')
+                if (generations[layer][i][j] !== 0) {
+                    ambientMaterial(cellTypes[generations[layer][i][j]]['color']);
                     box(scaledUnitSize);
                 }
                 translate(scaledUnitSize, 0, 0);
@@ -198,22 +246,28 @@ function computeNextGeneration(generations) {
 
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-            let state = lastGeneration[i][j];
-            let sumNeighbours = countNeighbours(getNeighbours(lastGeneration, i, j));
-
-            if (state === 0 && sumNeighbours === 3) {
-                nextGeneration[i][j] = 1;
-            } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                nextGeneration[i][j] = 0;
-            } else {
-                nextGeneration[i][j] = state;
-            }
+            nextGeneration[i][j] = applyRules('game-of-life', lastGeneration, i, j);
         }
     }
 
     generations.push(nextGeneration);
 
     return nextGeneration;
+}
+
+function applyRules(ruleSet, generation, i, j) {
+    if (ruleSet == 'game-of-life') {
+        let state = generation[i][j];
+        let sumNeighbours = countNeighbours(getNeighbours(generation, i, j), '1');
+
+        if (state === 0 && sumNeighbours === 3) {
+            return 1;
+        } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
+            return 0;
+        } else {
+            return state;
+        }
+    }
 }
 
 function getNeighbours(grid, x, y) {
@@ -234,11 +288,15 @@ function getNeighbours(grid, x, y) {
 }
 
 
-function countNeighbours(neighbours) {
+function countNeighbours(neighbours, cellType) {
+    if (typeof(cellType) === 'undefined') cellType = '1';
+
     let sum = 0;
 
     for (let i = 0; i < neighbours.length; i++) {
-        sum += parseInt(neighbours[i]);
+        if (neighbours[i] === '1') {
+            sum += 1;
+        }
     }
 
     return sum;
