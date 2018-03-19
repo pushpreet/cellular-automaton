@@ -29,7 +29,8 @@ var easycam;
 
 let renderType = '3D';
 var generationTimer;
-var layerCount = 0;
+
+var generations = [];
 
 function setup() {
     pixelDensity(1);
@@ -44,9 +45,13 @@ function setup() {
     canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
     canvas.parent('main-window');
 
-    //setAttributes('antialias', true);
-
-    easycam = createEasyCam({distance:700});
+    easycam = createEasyCam(
+        {
+            distance: 1000, 
+            center: [0, 0, 0], 
+            rotation: [-0.789256211949631, -0.5801862284959685, -0.13605329050391265, 0.14814882485389935]
+        }
+    );
 
     mainWindowPadding = canvasSizeY/10;
     _top = 0 - canvasSizeY/2;
@@ -112,6 +117,7 @@ function draw() {
     drawGrid();
     drawLayer(grid, 0);
     //grid = computeNextGeneration(grid);
+    console.log(easycam.getRotation());
 }
 
 function drawUI() {
