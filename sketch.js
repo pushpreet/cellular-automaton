@@ -19,9 +19,6 @@ let scaledUnitSize;
 let rows;
 let cols;
 
-let grid;
-let oldGrid;
-
 var mainWindow;
 var canvas;
 
@@ -44,6 +41,8 @@ function setup() {
     canvas.style('display', 'block');
     canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
     canvas.parent('main-window');
+
+    //setAttributes('antialiasing', true);
 
     easycam = createEasyCam(
         {
@@ -75,16 +74,8 @@ function setup() {
     rows = plotSizeX / unitSize;
     cols = plotSizeY / unitSize;
 
-    grid = make2DArray(cols, rows);
-    oldGrid = make2DArray(cols, rows);
-
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            grid[i][j] = floor(random(2));
-        }
-    }
-
-    var generationTimer = setInterval(function () {computeNextGeneration(grid)}, 100);
+    setInitialGeneration(cols, rows);
+    generationTimer = setInterval(function () {computeNextGeneration(generations)}, 100);
 }
 
 function windowResized() {
@@ -107,17 +98,30 @@ function windowResized() {
     );
 }
 
-function mouseWheel(event) {
-    return false;
-}
-
 function draw() {
     drawUI();
     setLights();
     drawGrid();
-    drawLayer(grid, 0);
-    //grid = computeNextGeneration(grid);
-    console.log(easycam.getRotation());
+    drawLayers(generations, 0);
+
+    if (generations.length === 20) {
+        clearInterval(generationTimer);
+    }
+}
+
+function mouseWheel(event) {
+    return false;
+}
+
+function setInitialGeneration(cols, rows) {
+    generations.length = 0;
+    generations.push(make2DArray(cols, rows));
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            generations[0][i][j] = floor(random(2));
+        }
+    }
 }
 
 function drawUI() {
@@ -126,8 +130,10 @@ function drawUI() {
 }
 
 function setLights() {
-    pointLight(255, 255, 255, 2*_left, 2*_top, 1500);
-    pointLight(255, 255, 255, 2*_right, 2*_top, 1500);
+    pointLight(255, 255, 255, 2*_left, 2*_top, 500);
+    pointLight(255, 255, 255, 2*_right, 2*_top, 500);
+    pointLight(255, 255, 255, 2*_right, 2*_bottom, 500);
+    pointLight(255, 255, 255, 2*_left, 2*_bottom, 500);
 }
 
 function drawGrid() {
@@ -149,18 +155,23 @@ function drawGrid() {
     }
 }
 
-function drawLayer(layer, zOffset) {
-    translate(gridTopLeftPoint.x, gridTopLeftPoint.y, gridTopLeftPoint.z + (scaledUnitSize * zOffset));
+function drawLayers(generations, layerStart, layerEnd) {
+    if (typeof(layerEnd) === 'undefined') layerEnd = generations.length;
 
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            if (layer[i][j] == 1) {
-                ambientMaterial('#16a085')
-                box(scaledUnitSize);
+    translate(gridTopLeftPoint.x, gridTopLeftPoint.y, gridTopLeftPoint.z + (scaledUnitSize * layerStart));
+
+    for (let layer = layerStart; layer < layerEnd; layer++) {
+        for (let i = 0; i < cols; i++) {
+            for (let j = 0; j < rows; j++) {
+                if (generations[layer][i][j] == 1) {
+                    ambientMaterial('#16a085')
+                    box(scaledUnitSize);
+                }
+                translate(scaledUnitSize, 0, 0);
             }
-            translate(scaledUnitSize, 0, 0);
+            translate(-rows * scaledUnitSize, scaledUnitSize, 0);
         }
-        translate(-rows * scaledUnitSize, scaledUnitSize, 0);
+        translate(0, -cols * scaledUnitSize, scaledUnitSize);
     }
 }
 
@@ -179,35 +190,28 @@ function make2DArray(cols, rows) {
     return arr;
 }
 
-function computeNextGeneration(grid) {
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            oldGrid[i][j] = grid[i][j];
-        }
-    }
+function computeNextGeneration(generations) {
+    let nextGeneration = make2DArray(cols, rows);
+    let lastGeneration = generations.slice(-1)[0];
 
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-            let state = oldGrid[i][j];
-            let sumNeighbours = countNeighbours(getNeighbours(oldGrid, i, j));
+            let state = lastGeneration[i][j];
+            let sumNeighbours = countNeighbours(getNeighbours(lastGeneration, i, j));
 
-            if (state == 0 && sumNeighbours == 3) {
-                grid[i][j] = 1;
-            } else if (state == 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                grid[i][j] = 0;
+            if (state === 0 && sumNeighbours === 3) {
+                nextGeneration[i][j] = 1;
+            } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                nextGeneration[i][j] = 0;
             } else {
-                grid[i][j] = state;
+                nextGeneration[i][j] = state;
             }
         }
     }
 
-    layerCount += 1;
+    generations.push(nextGeneration);
 
-    if (layerCount == 20) {
-        clearInterval(generationTimer);
-    }
-
-    return grid;
+    return nextGeneration;
 }
 
 function getNeighbours(grid, x, y) {
@@ -218,7 +222,7 @@ function getNeighbours(grid, x, y) {
             let col = (x + i + cols) % cols;
             let row = (y + j + rows) % rows;
             
-            if (i != 0 || j != 0) {
+            if (i !== 0 || j !== 0) {
                     neighbours += grid[col][row].toString();    
             }
         }
