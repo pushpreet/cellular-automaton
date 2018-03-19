@@ -1,6 +1,7 @@
-let plotSizeX = 1000;
-let plotSizeY = 1000;
-let unitSize = 50;
+let plotSizeX = 45;
+let plotSizeY = 90;
+let unitSize = 9;
+let floors = 20;
 
 let mainWindowPadding;
 let _top;
@@ -48,7 +49,7 @@ function setup() {
         {
             distance: 1000, 
             center: [0, 0, 0], 
-            rotation: [-0.789256211949631, -0.5801862284959685, -0.13605329050391265, 0.14814882485389935]
+            rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303]
         }
     );
 
@@ -102,9 +103,9 @@ function draw() {
     drawUI();
     setLights();
     drawGrid();
-    drawLayers(generations, 0);
+    drawLayers(generations);
 
-    if (generations.length === 20) {
+    if (generations.length === floors) {
         clearInterval(generationTimer);
     }
 }
@@ -140,14 +141,14 @@ function drawGrid() {
     stroke('#7f8c8d');
     strokeWeight(2);
         
-    for (let i = 0; i < cols + 1; i++) {
+    for (let i = 0; i < rows + 1; i++) {
         let x = i * scaledUnitSize;
 
         line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
                 (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
     }
 
-    for (let j = 0; j < rows + 1; j++) {
+    for (let j = 0; j < cols + 1; j++) {
         let y = j * scaledUnitSize;
 
         line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
@@ -156,6 +157,7 @@ function drawGrid() {
 }
 
 function drawLayers(generations, layerStart, layerEnd) {
+    if (typeof(layerStart) === 'undefined') layerStart = 0;
     if (typeof(layerEnd) === 'undefined') layerEnd = generations.length;
 
     translate(gridTopLeftPoint.x, gridTopLeftPoint.y, gridTopLeftPoint.z + (scaledUnitSize * layerStart));
