@@ -1,6 +1,6 @@
 let plotSizeX = 1000;
 let plotSizeY = 1000;
-let unitSize = 100;
+let unitSize = 50;
 
 let mainWindowPadding;
 let _top;
@@ -25,23 +25,28 @@ let oldGrid;
 var mainWindow;
 var canvas;
 
-let cameraState;
+var easycam;
 
 let renderType = '3D';
-
-let zoomSensitivity = 2;
+var generationTimer;
+var layerCount = 0;
 
 function setup() {
+    pixelDensity(1);
+
     mainWindow = document.getElementById('main-window');
     canvasSizeX = mainWindow.clientWidth;
     canvasSizeY = mainWindow.clientHeight;
 
     canvas = createCanvas(canvasSizeX, canvasSizeY, WEBGL);
+
     canvas.style('display', 'block');
     canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
     canvas.parent('main-window');
 
-    canvas.mouseWheel(setZoom);
+    //setAttributes('antialias', true);
+
+    easycam = createEasyCam({distance:700});
 
     mainWindowPadding = canvasSizeY/10;
     _top = 0 - canvasSizeY/2;
@@ -68,34 +73,13 @@ function setup() {
     grid = make2DArray(cols, rows);
     oldGrid = make2DArray(cols, rows);
 
-    cameraState = {
-        posX: 0,
-        posY: 0,
-        posZ: (height/2) / (tan(PI/6)),
-        centerX: 0,
-        centerY: 0,
-        centerZ: 0,
-        upX: 0,
-        upY: 1,
-        upZ: 0
-    }
-
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
             grid[i][j] = floor(random(2));
         }
     }
 
-    frameRate(12);
-}
-
-function draw() {
-    drawUI();
-    setLights();
-    setCamera();
-    drawGrid();
-    drawLayer(grid, 0);
-    grid = computeNextGeneration(grid);
+    var generationTimer = setInterval(function () {computeNextGeneration(grid)}, 100);
 }
 
 function windowResized() {
@@ -103,6 +87,7 @@ function windowResized() {
     canvasSizeY = mainWindow.clientHeight;
 
     resizeCanvas(canvasSizeX, canvasSizeY);
+    easycam.setViewport([0,0,windowWidth, windowHeight]);
 
     mainWindowPadding = canvasSizeY/10;
     _top = 0 - canvasSizeY/2;
@@ -117,39 +102,26 @@ function windowResized() {
     );
 }
 
+function mouseWheel(event) {
+    return false;
+}
+
+function draw() {
+    drawUI();
+    setLights();
+    drawGrid();
+    drawLayer(grid, 0);
+    //grid = computeNextGeneration(grid);
+}
+
 function drawUI() {
     // set background color
     background('#34495e');
 }
 
 function setLights() {
-    pointLight(255, 255, 255, _left, 0, 1000);
-}
-
-function todo() {
-    if (mouseIsPressed) {
-        let intialMouseX = mouseX;
-        let intialMouseY = mouseY;
-
-        let camX = map(mouseX - intialMouseX, 0, width, 500, -500);
-        let camY = map(mouseY - intialMouseY, 0, width, 500, -500);
-
-        cameraState.posX += camX;
-        cameraState.posY += camY;
-    }
-}
-
-function setCamera() {
-    camera(
-        cameraState.posX, cameraState.posY, cameraState.posZ,
-        cameraState.centerX, cameraState.centerY, cameraState.centerZ,
-        cameraState.upX, cameraState.upY, cameraState.upZ
-    );
-}
-
-function setZoom(event) {
-    cameraState.posZ += zoomSensitivity * float(event.deltaY);
-    setCamera();
+    pointLight(255, 255, 255, 2*_left, 2*_top, 1500);
+    pointLight(255, 255, 255, 2*_right, 2*_top, 1500);
 }
 
 function drawGrid() {
@@ -184,8 +156,6 @@ function drawLayer(layer, zOffset) {
         }
         translate(-rows * scaledUnitSize, scaledUnitSize, 0);
     }
-
-    //console.table(layer);
 }
 
 function make2DArray(cols, rows) {
@@ -223,6 +193,12 @@ function computeNextGeneration(grid) {
                 grid[i][j] = state;
             }
         }
+    }
+
+    layerCount += 1;
+
+    if (layerCount == 20) {
+        clearInterval(generationTimer);
     }
 
     return grid;
