@@ -1,7 +1,7 @@
 let plotSizeX = 45;
 let plotSizeY = 90;
 let unitSize = 9;
-let floors = 20;
+let floors = 14;
 
 let mainWindowPadding;
 let _top;
@@ -45,7 +45,7 @@ var cellTypes = {
 
     2: {
         name: 'residential-basic',
-        color: '#1abc9c',
+        color: '#2ecc71',
         unit: 9
     },
 
@@ -152,25 +152,6 @@ function mouseWheel(event) {
     return false;
 }
 
-function setInitialGeneration(cols, rows) {
-    generations.length = 0;
-    generations.push(make2DArray(cols, rows));
-
-    //random for testing
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            generations[0][i][j] = floor(random(2));
-        }
-    }
-
-    //random with types
-    // for (let i = 0; i < cols; i++) {
-    //     for (let j = 0; j < rows; j++) {
-    //         generations[0][i][j] = floor(random(Object.keys(cellTypes).length));
-    //     }
-    // }
-}
-
 function drawUI() {
     // set background color
     background('#34495e');
@@ -183,6 +164,21 @@ function setLights() {
     pointLight(255, 255, 255, 2*_left, 2*_bottom, 500);
 
     pointLight(255, 255, 255, 0, 0, 15000);
+}
+
+function make2DArray(cols, rows) {
+    let arr = new Array(cols);
+    for (let i = 0; i < arr.length; i++) {
+        arr[i] = new Array(rows);
+    }
+
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            arr[i][j] = 0;
+        }
+    }
+    
+    return arr;
 }
 
 function drawGrid() {
@@ -201,6 +197,32 @@ function drawGrid() {
 
         line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
                 (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
+    }
+}
+
+function setInitialGeneration(cols, rows) {
+    generations.length = 0;
+    generations.push(make2DArray(cols, rows));
+
+    //random for testing
+    // for (let i = 0; i < cols; i++) {
+    //     for (let j = 0; j < rows; j++) {
+    //         generations[0][i][j] = floor(random(2));
+    //     }
+    // }
+
+    // office-residence
+    for (let i = 0; i < cols; i++) {
+        for (let j = 0; j < rows; j++) {
+            if (((i === 4) && (j === 1)) || ((i === 5) && (j === 1)) || ((i === 4) && (j === 2)) || ((i === 5) && (j === 2))) {
+                generations[0][i][j] = 5;
+            }
+            else {
+                if (floor(random(2)) == 1) {
+                    generations[0][i][j] = 4;
+                }
+            }
+        }
     }
 }
 
@@ -225,28 +247,13 @@ function drawLayers(generations, layerStart, layerEnd) {
     }
 }
 
-function make2DArray(cols, rows) {
-    let arr = new Array(cols);
-    for (let i = 0; i < arr.length; i++) {
-        arr[i] = new Array(rows);
-    }
-
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            arr[i][j] = 0;
-        }
-    }
-    
-    return arr;
-}
-
 function computeNextGeneration(generations) {
     let nextGeneration = make2DArray(cols, rows);
     let lastGeneration = generations.slice(-1)[0];
 
     for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
-            nextGeneration[i][j] = applyRules('game-of-life', lastGeneration, i, j);
+            nextGeneration[i][j] = applyRules('simple-office-residence', lastGeneration, i, j);
         }
     }
 
@@ -256,18 +263,58 @@ function computeNextGeneration(generations) {
 }
 
 function applyRules(ruleSet, generation, i, j) {
-    if (ruleSet == 'game-of-life') {
-        let state = generation[i][j];
-        let sumNeighbours = countNeighbours(getNeighbours(generation, i, j), '1');
+    switch (ruleSet) {
+        case 'game-of-life': {
+            let state = generation[i][j];
+            let sumNeighbours = countNeighbours(getNeighbours(generation, i, j));
 
-        if (state === 0 && sumNeighbours === 3) {
-            return 1;
-        } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
-            return 0;
-        } else {
-            return state;
+            if (state === 0 && sumNeighbours === 3) {
+                return 1;
+            } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                return 0;
+            } else {
+                return state;
+            }
+
+            break;
+        }
+
+        case 'simple-office-residence': {
+            let state = generation[i][j];
+            let neighbours = getNeighbours(generation, i, j);
+
+            if (generations.length < 8) {
+                if (state === 5) return 5;
+                else {
+                    let sumNeighbours = countNeighbours(neighbours, [4, 5])
+                    if (state === 0 && sumNeighbours === 3) {
+                        return 4;
+                    } else if (state === 4 && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                        return 0;
+                    } else {
+                        return state;
+                    }
+                }
+            } 
+            else {
+                if ((neighbours[0] === '5') && (neighbours[1] === '5') && (neighbours[3] == '5') || (state === 3)) return 3;
+                else {
+                    let sumNeighbours = countNeighbours(neighbours, [2, 3, 4, 5])
+                    if (state === 0 && sumNeighbours === 3) {
+                        return 2;
+                    } else if ((state === 2 || state === 5 || state === 4) && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                        return 0;
+                    } else {
+                        if (state == 4) return 2;
+                        else return state;
+                    }
+                }
+            }
+            
+            break;
         }
     }
+    
 }
 
 function getNeighbours(grid, x, y) {
@@ -279,7 +326,7 @@ function getNeighbours(grid, x, y) {
             let row = (y + j + rows) % rows;
             
             if (i !== 0 || j !== 0) {
-                    neighbours += grid[col][row].toString();    
+                    neighbours += grid[col][row].toString();
             }
         }
     }
@@ -289,12 +336,17 @@ function getNeighbours(grid, x, y) {
 
 
 function countNeighbours(neighbours, cellType) {
-    if (typeof(cellType) === 'undefined') cellType = '1';
+    if (typeof(cellType) === 'undefined') cellType = ['1'];
+    else {
+        for (let i = 0; i < cellType.length; i++) {
+            cellType[i] = cellType[i].toString();
+        }
+    }
 
     let sum = 0;
 
     for (let i = 0; i < neighbours.length; i++) {
-        if (neighbours[i] === '1') {
+        if (cellType.indexOf(neighbours[i]) !== -1) {
             sum += 1;
         }
     }
