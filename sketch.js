@@ -305,7 +305,7 @@ function applyRules(ruleSet, generation, i, j) {
                     } else if ((state === 2 || state === 5 || state === 4) && (sumNeighbours < 2 || sumNeighbours > 3)) {
                         return 0;
                     } else {
-                        if (state == 4) return 2;
+                        if (state === 4 || state ===5) return 2;
                         else return state;
                     }
                 }
