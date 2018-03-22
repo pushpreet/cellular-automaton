@@ -1,34 +1,7 @@
-let plotSizeX = 45;
-let plotSizeY = 90;
-let unitSize = 9;
-let floors = 14;
-
-let mainWindowPadding;
-let _top;
-let _left;
-let _right;
-let _bottom;
-let gridTopLeftPoint;
-
-let canvasSizeX;
-let canvasSizeY;
-
-let scaledPlotSizeX;
-let scaledPlotSizeY;
-let scaledUnitSize;
-
-let rows;
-let cols;
-
-var mainWindow;
-var canvas;
-
-var easycam;
-
-let renderType = '3D';
-var generationTimer;
-
-var generations = [];
+var plotSizeX = 45;
+var plotSizeY = 90;
+var unitSize = 9;
+var floors = 14;    
 
 var cellTypes = {
     0: {
@@ -62,294 +35,153 @@ var cellTypes = {
     },
 
     5: {
-        name: 'offic-core',
+        name: 'office-core',
         color: '#d35400',
         unit: 18
     }
 };
 
-function setup() {
-    pixelDensity(1);
+var sketch = function(p) {
+    let mainWindow;
+    let canvasSizeX;
+    let canvasSizeY;
 
-    mainWindow = document.getElementById('main-window');
-    canvasSizeX = mainWindow.clientWidth;
-    canvasSizeY = mainWindow.clientHeight;
+    let mainWindowPadding;
+    let _top;
+    let _left;
+    let _right;
+    let _bottom;
+    let gridTopLeft;
 
-    canvas = createCanvas(canvasSizeX, canvasSizeY, WEBGL);
+    let gridRows = plotSizeX / unitSize;
+    let gridCols = plotSizeY / unitSize;
 
-    canvas.style('display', 'block');
-    canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
-    canvas.parent('main-window');
+    let renderType = '3D';
+    let layerDrawTimer;
 
-    //setAttributes('antialiasing', true);
+    var automaton;
 
-    easycam = createEasyCam(
-        {
-            distance: 1200, 
-            center: [0, 0, 300], 
-            rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303]
-        }
-    );
+    p.setup = function() {
+        p.pixelDensity(1);
 
-    mainWindowPadding = canvasSizeY/10;
-    _top = 0 - canvasSizeY/2;
-    _left = 0 - canvasSizeX/2;
-    _right = 0 + canvasSizeX/2;
-    _bottom = 0 + canvasSizeY/2;
-    
-    let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
-                ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
+        mainWindow = document.getElementById('main-window');
+        canvasSizeX = mainWindow.clientWidth-3;
+        canvasSizeY = mainWindow.clientHeight-3;
 
-    scaledPlotSizeX = plotSizeX * scale;
-    scaledPlotSizeY = plotSizeY * scale;
-    scaledUnitSize = unitSize * scale;
+        let canvas = p.createCanvas(canvasSizeX, canvasSizeY, p.WEBGL);
+        canvas.style('display', 'block');
+        canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
 
-    gridTopLeftPoint = createVector(
-        (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-        (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-        scaledUnitSize/2
-    );
+        p.setAttributes('antialiasing', true);
 
-    rows = plotSizeX / unitSize;
-    cols = plotSizeY / unitSize;
-
-    setInitialGeneration(cols, rows);
-    generationTimer = setInterval(function () {computeNextGeneration(generations)}, 100);
-}
-
-function windowResized() {
-    canvasSizeX = mainWindow.clientWidth;
-    canvasSizeY = mainWindow.clientHeight;
-
-    resizeCanvas(canvasSizeX, canvasSizeY);
-    easycam.setViewport([0,0,windowWidth, windowHeight]);
-
-    mainWindowPadding = canvasSizeY/10;
-    _top = 0 - canvasSizeY/2;
-    _left = 0 - canvasSizeX/2;
-    _right = 0 + canvasSizeX/2;
-    _bottom = 0 + canvasSizeY/2;
-
-    gridTopLeftPoint = set(
-        (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-        (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-        scaledUnitSize/2
-    );
-}
-
-function draw() {
-    drawUI();
-    setLights();
-    drawGrid();
-    drawLayers(generations);
-
-    if (generations.length === floors) {
-        clearInterval(generationTimer);
-    }
-}
-
-function mouseWheel(event) {
-    return false;
-}
-
-function drawUI() {
-    // set background color
-    background('#34495e');
-}
-
-function setLights() {
-    pointLight(255, 255, 255, 2*_left, 2*_top, 500);
-    pointLight(255, 255, 255, 2*_right, 2*_top, 500);
-    pointLight(255, 255, 255, 2*_right, 2*_bottom, 500);
-    pointLight(255, 255, 255, 2*_left, 2*_bottom, 500);
-
-    pointLight(255, 255, 255, 0, 0, 15000);
-}
-
-function make2DArray(cols, rows) {
-    let arr = new Array(cols);
-    for (let i = 0; i < arr.length; i++) {
-        arr[i] = new Array(rows);
-    }
-
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            arr[i][j] = 0;
-        }
-    }
-    
-    return arr;
-}
-
-function drawGrid() {
-    stroke('#7f8c8d');
-    strokeWeight(2);
+        mainWindowPadding = canvasSizeY/10;
+        _top = 0 - canvasSizeY/2;
+        _left = 0 - canvasSizeX/2;
+        _right = 0 + canvasSizeX/2;
+        _bottom = 0 + canvasSizeY/2;
         
-    for (let i = 0; i < rows + 1; i++) {
-        let x = i * scaledUnitSize;
+        let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
+                    ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
 
-        line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
-                (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
+        scaledPlotSizeX = plotSizeX * scale;
+        scaledPlotSizeY = plotSizeY * scale;
+        scaledUnitSize = unitSize * scale;
+
+        gridTopLeft = p.createVector(
+            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+            scaledUnitSize/2
+        );
+
+        automaton = new CellularAutomaton(gridRows, gridCols);
+        automaton.setInitialGeneration();
+
+        layerDrawTimer = setInterval(function () {automaton.computeNextGeneration()}, 100);
     }
 
-    for (let j = 0; j < cols + 1; j++) {
-        let y = j * scaledUnitSize;
+    p.windowResized = function() {
+        canvasSizeX = mainWindow.clientWidth-3;
+        canvasSizeY = mainWindow.clientHeight-3;
 
-        line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
-                (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
-    }
-}
+        p.resizeCanvas(canvasSizeX, canvasSizeY);
 
-function setInitialGeneration(cols, rows) {
-    generations.length = 0;
-    generations.push(make2DArray(cols, rows));
+        mainWindowPadding = canvasSizeY/10;
+        _top = 0 - canvasSizeY/2;
+        _left = 0 - canvasSizeX/2;
+        _right = 0 + canvasSizeX/2;
+        _bottom = 0 + canvasSizeY/2;
 
-    //random for testing
-    // for (let i = 0; i < cols; i++) {
-    //     for (let j = 0; j < rows; j++) {
-    //         generations[0][i][j] = floor(random(2));
-    //     }
-    // }
-
-    // office-residence
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            if (((i === 4) && (j === 1)) || ((i === 5) && (j === 1)) || ((i === 4) && (j === 2)) || ((i === 5) && (j === 2))) {
-                generations[0][i][j] = 5;
-            }
-            else {
-                if (floor(random(2)) == 1) {
-                    generations[0][i][j] = 4;
-                }
-            }
-        }
-    }
-}
-
-function drawLayers(generations, layerStart, layerEnd) {
-    if (typeof(layerStart) === 'undefined') layerStart = 0;
-    if (typeof(layerEnd) === 'undefined') layerEnd = generations.length;
-
-    translate(gridTopLeftPoint.x, gridTopLeftPoint.y, gridTopLeftPoint.z + (scaledUnitSize * layerStart));
-
-    for (let layer = layerStart; layer < layerEnd; layer++) {
-        for (let i = 0; i < cols; i++) {
-            for (let j = 0; j < rows; j++) {
-                if (generations[layer][i][j] !== 0) {
-                    ambientMaterial(cellTypes[generations[layer][i][j]]['color']);
-                    box(scaledUnitSize);
-                }
-                translate(scaledUnitSize, 0, 0);
-            }
-            translate(-rows * scaledUnitSize, scaledUnitSize, 0);
-        }
-        translate(0, -cols * scaledUnitSize, scaledUnitSize);
-    }
-}
-
-function computeNextGeneration(generations) {
-    let nextGeneration = make2DArray(cols, rows);
-    let lastGeneration = generations.slice(-1)[0];
-
-    for (let i = 0; i < cols; i++) {
-        for (let j = 0; j < rows; j++) {
-            nextGeneration[i][j] = applyRules('simple-office-residence', lastGeneration, i, j);
-        }
+        gridTopLeft = set(
+            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+            scaledUnitSize/2
+        );
     }
 
-    generations.push(nextGeneration);
+    p.draw = function() {
+        drawUI();
+        setLights();
+        drawGrid();
+        drawLayers(automaton.generations);
+    }
 
-    return nextGeneration;
-}
+    p.mouseWheel = function(event) {
+        return false;
+    }
 
-function applyRules(ruleSet, generation, i, j) {
-    switch (ruleSet) {
-        case 'game-of-life': {
-            let state = generation[i][j];
-            let sumNeighbours = countNeighbours(getNeighbours(generation, i, j));
+    function drawUI() {
+        // set background color
+        p.background('#34495e');
+    }
 
-            if (state === 0 && sumNeighbours === 3) {
-                return 1;
-            } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                return 0;
-            } else {
-                return state;
-            }
+    function setLights() {
+        p.pointLight(255, 255, 255, 2*_left, 2*_top, 500);
+        p.pointLight(255, 255, 255, 2*_right, 2*_top, 500);
+        p.pointLight(255, 255, 255, 2*_right, 2*_bottom, 500);
+        p.pointLight(255, 255, 255, 2*_left, 2*_bottom, 500);
 
-            break;
-        }
+        p.pointLight(255, 255, 255, 0, 0, 15000);
+    }
 
-        case 'simple-office-residence': {
-            let state = generation[i][j];
-            let neighbours = getNeighbours(generation, i, j);
-
-            if (generations.length < 8) {
-                if (state === 5) return 5;
-                else {
-                    let sumNeighbours = countNeighbours(neighbours, [4, 5])
-                    if (state === 0 && sumNeighbours === 3) {
-                        return 4;
-                    } else if (state === 4 && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                        return 0;
-                    } else {
-                        return state;
-                    }
-                }
-            } 
-            else {
-                if ((neighbours[0] === '5') && (neighbours[1] === '5') && (neighbours[3] == '5') || (state === 3)) return 3;
-                else {
-                    let sumNeighbours = countNeighbours(neighbours, [2, 3, 4, 5])
-                    if (state === 0 && sumNeighbours === 3) {
-                        return 2;
-                    } else if ((state === 2 || state === 5 || state === 4) && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                        return 0;
-                    } else {
-                        if (state === 4 || state ===5) return 2;
-                        else return state;
-                    }
-                }
-            }
+    function drawGrid() {
+        p.stroke('#7f8c8d');
+        p.strokeWeight(2);
             
-            break;
+        for (let i = 0; i < gridRows + 1; i++) {
+            let x = i * scaledUnitSize;
+
+            p.line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
+                    (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
+        }
+
+        for (let j = 0; j < gridCols + 1; j++) {
+            let y = j * scaledUnitSize;
+
+            p.line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
+                    (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
         }
     }
-    
-}
 
-function getNeighbours(grid, x, y) {
-    let neighbours = '';
+    function drawLayers(generations, layerStart, layerEnd) {
+        if (typeof(layerStart) === 'undefined') layerStart = 0;
+        if (typeof(layerEnd) === 'undefined') layerEnd = generations.length;
 
-    for (let i = -1; i < 2; i++) {
-        for (let j = -1; j < 2; j++) {
-            let col = (x + i + cols) % cols;
-            let row = (y + j + rows) % rows;
-            
-            if (i !== 0 || j !== 0) {
-                    neighbours += grid[col][row].toString();
+        p.translate(gridTopLeft.x, gridTopLeft.y, gridTopLeft.z + (scaledUnitSize * layerStart));
+
+        for (let layer = layerStart; layer < layerEnd; layer++) {
+            for (let i = 0; i < gridRows; i++) {
+                for (let j = 0; j < gridCols; j++) {
+                    if (generations[layer][i][j] !== 0) {
+                        p.ambientMaterial(cellTypes[generations[layer][i][j]]['color']);
+                        p.box(scaledUnitSize);
+                    }
+                    p.translate(0, scaledUnitSize, 0);
+                }
+                p.translate(scaledUnitSize, -gridCols * scaledUnitSize, 0);
             }
+            p.translate(-gridRows * scaledUnitSize, 0, scaledUnitSize);
         }
     }
-
-    return neighbours;
 }
 
-
-function countNeighbours(neighbours, cellType) {
-    if (typeof(cellType) === 'undefined') cellType = ['1'];
-    else {
-        for (let i = 0; i < cellType.length; i++) {
-            cellType[i] = cellType[i].toString();
-        }
-    }
-
-    let sum = 0;
-
-    for (let i = 0; i < neighbours.length; i++) {
-        if (cellType.indexOf(neighbours[i]) !== -1) {
-            sum += 1;
-        }
-    }
-
-    return sum;
-}
+new p5(sketch, 'main-window');
