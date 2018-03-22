@@ -50,7 +50,7 @@ function CellularAutomaton(rows, cols, wraparound) {
     
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                nextGeneration[row][col] = this.applyRules('game-of-life', lastGeneration, row, col);
+                nextGeneration[row][col] = this.applyRules('simple-office-residence', lastGeneration, row, col);
             }
         }
         
@@ -89,7 +89,7 @@ function CellularAutomaton(rows, cols, wraparound) {
                 let state = generation[row][col];
                 let neighbours = this.getNeighbours(generation, row, col);
     
-                if (generations.length < 8) {
+                if (this.generations.length < 8) {
                     if (state === 5) {
                         return 5;
                     }
@@ -148,7 +148,7 @@ function CellularAutomaton(rows, cols, wraparound) {
                     let y = col + j;
                     
                     if (i !== 0 || j !== 0) {
-                        if (typeof(generation[x][y]) === 'undefined') {
+                        if (x < 0 || y < 0 || x >= this.rows || y >= this.cols) {
                             neighbours += '0';
                         }
                         else {

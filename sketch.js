@@ -61,6 +61,8 @@ var sketch = function(p) {
 
     var automaton;
 
+    var easycam;
+
     p.setup = function() {
         p.pixelDensity(1);
 
@@ -69,10 +71,18 @@ var sketch = function(p) {
         canvasSizeY = mainWindow.clientHeight-3;
 
         let canvas = p.createCanvas(canvasSizeX, canvasSizeY, p.WEBGL);
-        canvas.style('display', 'block');
-        canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
+        //canvas.style('display', 'block');
+        //canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
 
         p.setAttributes('antialiasing', true);
+
+        easycam = p.createEasyCam(
+            {
+                distance: 1200, 
+                center: [0, 0, 300], 
+                rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303]
+            }
+        );    
 
         mainWindowPadding = canvasSizeY/10;
         _top = 0 - canvasSizeY/2;
@@ -93,8 +103,29 @@ var sketch = function(p) {
             scaledUnitSize/2
         );
 
-        automaton = new CellularAutomaton(gridRows, gridCols);
-        automaton.setInitialGeneration();
+        automaton = new CellularAutomaton(gridRows, gridCols, false);
+
+        let initialGeneration = new Array(gridRows);
+        for (let i = 0; i < initialGeneration.length; i++) {
+            initialGeneration[i] = new Array(gridCols);
+        }
+
+        // office-residence
+        for (let i = 0; i < gridRows; i++) {
+            for (let j = 0; j < gridCols; j++) {
+                if (((i === 1) && (j === 4)) || ((i === 1) && (j === 5)) || ((i === 2) && (j === 4)) || ((i === 2) && (j === 5))) {
+                    initialGeneration[i][j] = 5;
+                }
+                else if (p.floor(p.random(2)) == 1) {
+                    initialGeneration[i][j] = 4;
+                }
+                else {
+                    initialGeneration[i][j] = 0;
+                }
+            }
+        }
+
+        automaton.setInitialGeneration(initialGeneration);
 
         layerDrawTimer = setInterval(function () {automaton.computeNextGeneration()}, 100);
     }
@@ -104,6 +135,7 @@ var sketch = function(p) {
         canvasSizeY = mainWindow.clientHeight-3;
 
         p.resizeCanvas(canvasSizeX, canvasSizeY);
+        easycam.setViewport([0,0,windowWidth, windowHeight]);
 
         mainWindowPadding = canvasSizeY/10;
         _top = 0 - canvasSizeY/2;
@@ -123,6 +155,10 @@ var sketch = function(p) {
         setLights();
         drawGrid();
         drawLayers(automaton.generations);
+
+        if (automaton.generations.length === floors) {
+            clearInterval(layerDrawTimer);
+        }
     }
 
     p.mouseWheel = function(event) {
@@ -141,6 +177,40 @@ var sketch = function(p) {
         p.pointLight(255, 255, 255, 2*_left, 2*_bottom, 500);
 
         p.pointLight(255, 255, 255, 0, 0, 15000);
+    }
+
+    function cameraHandler() {
+        this.state = {
+            x: 0,
+            y: (p.height / 2) / (p.tan(p.PI / 6)),
+            z: 0,
+            centerX: 0,
+            centerY: 0,
+            centerZ: 0,
+            upX: 0,
+            upY: 1,
+            upZ: 0,
+        }
+
+        this.zoomScale = 2;
+
+        this.setInitial = function(x, y, z, centerX, centerY, centerZ, upX, upY, upZ) {
+            this.state.x = x;
+            this.state.y = y;
+            this.state.z = z;
+            this.state.centerX = centerX;
+            this.state.centerY = centerY;
+            this.state.centerZ = centerZ;
+            this.state.upX = upX;
+            this.state.upY = upY;
+            this.state.upZ = upZ;
+        }
+
+        this.zoom = function(magnitude) {
+
+        }
+
+        this.reset()
     }
 
     function drawGrid() {
