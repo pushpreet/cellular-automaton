@@ -15,17 +15,93 @@
 	<script src="libraries/p5.easycam.js"></script>
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato" />
 	<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 	<div class="container-fluid fill">
 		<div class="row fill">
-			<div id="menu" class="col-lg-2 col-md-2 col-sm-12 col-xs-12">
-				<h3><span class="badge badge-primary">Cellular Automaton</span></h3>
-			</div>
+			<div id="menu" class="container col-lg-2 col-md-3 col-sm-12 col-xs-12">
+				<div class="row">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+						<h4 style="color: white; font-family: Lato">Cellular Automaton</h4>
+						<hr size=3px style="border-color: white">
+					</div>
 
-			<div id="main-window" class="col-lg-10 col-md-10 col-sm-12 col-xs-12 padding-0">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
+						<div class="row">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<h6 style="color: white; font-family: Lato">Initial Generation</h6>
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Plot Width</span>
+								</div>
+								<input id="inputPlotWidth" type="number" value=100 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Plot Length</span>
+								</div>
+								<input id="inputPlotLength" type="number" value=100 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Unit Size</span>
+								</div>
+								<input id="inputUnitSize" type="number" value=10 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Core Cells</span>
+								</div>
+								<input id="inputCoreCells" type="text" value="(2,4), (2,5)" class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<button id="buttonSetInitial" type="button" class="btn btn-light btn-sm">Set Initial</button>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
+						<div class="row">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<h6 style="color: white; font-family: Lato">Propagation</h6>
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Floors</span>
+								</div>
+								<input id="inputFloors" type="number" value=14 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Floor fill %</span>
+								</div>
+								<input id="inputMinFloorFill" type="number" value=50 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<div class="input-group-prepend">
+									<span class="input-group-text" id="inputGroup-sizing-sm">Vol fill %</span>
+								</div>
+								<input id="inputMinVolFill" type="number" value=50 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
+							</div>
+							<div class="form-check col-lg-12 col-md-12 col-sm-3 col-xs-3">
+								<input class="form-check-input" type="checkbox" value="" id="inputWraparound" style="margin-left:0px;">
+								<label class="form-check-label" for="inputWraparound" style="padding-left:20px; font-family:Lato;">
+									Wraparound
+								</label>
+							</div>
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<button id="buttonPropagate" type="button" class="btn btn-light btn-sm">Propagate</button>
+							</div>
+						</div>
+					</div>
+
+				</div>
+			</div>
+			<div id="main-window" class="col-lg-10 col-md-9 col-sm-12 col-xs-12 padding-0">
 			</div>
 		</div>
 	</div>

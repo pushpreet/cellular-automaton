@@ -17,11 +17,38 @@ html, body {
 
 #menu {
 	padding-top: 15px;
-	padding-bottom: 15px;
+    padding-bottom: 15px;
+    padding-left: 15px;
+    padding-right: 15px;
 	background: #2c3e50;
 }
 
 .padding-0 {
     padding-right:0;
     padding-left:0;
+}
+
+label {
+    color: white;
+}
+
+.input-group {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+.input-group-text {
+    width: 90px;
+}
+
+.form-check {
+    padding-top: 3px;
+    padding-bottom: 3px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.btn {
+    margin-left: auto;
+    margin-right: 0px;
 }

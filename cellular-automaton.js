@@ -1,4 +1,6 @@
 function CellularAutomaton(rows, cols, wraparound) {
+    if (typeof(rows) === 'undefined') rows = 10;
+    if (typeof(cols) === 'undefined') cols = 10;
     if (typeof(wraparound) === 'undefined') wraparound = true;
 
     this.rows = rows;
@@ -14,6 +16,17 @@ function CellularAutomaton(rows, cols, wraparound) {
         }
 
         return arr;
+    }
+
+    this.initialise = function(rows, cols) {
+        this.rows = rows;
+        this.cols = cols;
+
+        this.generations = [];
+    }
+
+    this.setWraparound = function(wraparound) {
+        this.wraparound = wraparound;
     }
 
     this.setInitialGeneration = function(generation) {

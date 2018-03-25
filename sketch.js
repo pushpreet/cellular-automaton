@@ -1,7 +1,8 @@
 var plotSizeX = 45;
 var plotSizeY = 90;
 var unitSize = 9;
-var floors = 14;    
+var floors = 14;  
+var wraparound;  
 
 var cellTypes = {
     0: {
@@ -53,15 +54,31 @@ var sketch = function(p) {
     let _bottom;
     let gridTopLeft;
 
-    let gridRows = plotSizeX / unitSize;
-    let gridCols = plotSizeY / unitSize;
+    let gridRows;
+    let gridCols;
 
     let renderType = '3D';
     let layerDrawTimer;
 
-    var automaton;
+    var automaton = new CellularAutomaton();
 
     var easycam;
+
+    let inputs = {
+        'plotWidth': null,
+        'plotLength': null,
+        'unitSize': null,
+        'coreCells': null,
+        'floors': null,
+        'minFloorFill': null,
+        'minVolFill': null,
+        'wraparound': false
+    }
+
+    let buttons = {
+        'setInitial': null,
+        'propagate': null
+    }
 
     p.setup = function() {
         p.pixelDensity(1);
@@ -71,9 +88,6 @@ var sketch = function(p) {
         canvasSizeY = mainWindow.clientHeight-3;
 
         let canvas = p.createCanvas(canvasSizeX, canvasSizeY, p.WEBGL);
-        //canvas.style('display', 'block');
-        //canvas.class('col-lg-12 col-md-12 col-sm-12 col-xs-12 padding-0');
-
         p.setAttributes('antialiasing', true);
 
         easycam = p.createEasyCam(
@@ -82,52 +96,30 @@ var sketch = function(p) {
                 center: [0, 0, 300], 
                 rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303]
             }
-        );    
+        );
+
+        inputs['plotWidth'] = document.getElementById('inputPlotWidth');
+        inputs['plotLength'] = document.getElementById('inputPlotLength');
+        inputs['unitSize'] = document.getElementById('inputUnitSize');
+        inputs['coreCells'] = document.getElementById('inputCoreCells');
+        inputs['floors'] = document.getElementById('inputFloors');
+        inputs['minFloorFill'] = document.getElementById('inputMinFloorFill');
+        inputs['minVolFill'] = document.getElementById('inputMinVolFill');
+        inputs['wraparound'] = document.getElementById('inputWraparound');
+
+        buttons['setInitial'] = document.getElementById('buttonSetInitial');
+        buttons['propagate'] = document.getElementById('buttonPropagate');
+
+        buttons['setInitial'].onclick = setInitialParameters;
+        buttons['propagate'].onclick = propagate;
 
         mainWindowPadding = canvasSizeY/10;
         _top = 0 - canvasSizeY/2;
         _left = 0 - canvasSizeX/2;
         _right = 0 + canvasSizeX/2;
         _bottom = 0 + canvasSizeY/2;
-        
-        let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
-                    ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
 
-        scaledPlotSizeX = plotSizeX * scale;
-        scaledPlotSizeY = plotSizeY * scale;
-        scaledUnitSize = unitSize * scale;
-
-        gridTopLeft = p.createVector(
-            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-            scaledUnitSize/2
-        );
-
-        automaton = new CellularAutomaton(gridRows, gridCols, false);
-
-        let initialGeneration = new Array(gridRows);
-        for (let i = 0; i < initialGeneration.length; i++) {
-            initialGeneration[i] = new Array(gridCols);
-        }
-
-        // office-residence
-        for (let i = 0; i < gridRows; i++) {
-            for (let j = 0; j < gridCols; j++) {
-                if (((i === 1) && (j === 4)) || ((i === 1) && (j === 5)) || ((i === 2) && (j === 4)) || ((i === 2) && (j === 5))) {
-                    initialGeneration[i][j] = 5;
-                }
-                else if (p.floor(p.random(2)) == 1) {
-                    initialGeneration[i][j] = 4;
-                }
-                else {
-                    initialGeneration[i][j] = 0;
-                }
-            }
-        }
-
-        automaton.setInitialGeneration(initialGeneration);
-
-        layerDrawTimer = setInterval(function () {automaton.computeNextGeneration()}, 100);
+        //layerDrawTimer = setInterval(function () {automaton.computeNextGeneration()}, 100);
     }
 
     p.windowResized = function() {
@@ -154,11 +146,9 @@ var sketch = function(p) {
         drawUI();
         setLights();
         drawGrid();
-        drawLayers(automaton.generations);
 
-        if (automaton.generations.length === floors) {
-            clearInterval(layerDrawTimer);
-        }
+        if (automaton.generations.length > 0) drawLayers(automaton.generations);
+        if (automaton.generations.length === floors) clearInterval(layerDrawTimer);
     }
 
     p.mouseWheel = function(event) {
@@ -211,6 +201,61 @@ var sketch = function(p) {
         }
 
         this.reset()
+    }
+
+    function setInitialParameters() {
+        clearInterval(layerDrawTimer);
+
+        plotSizeX = parseInt(inputs['plotWidth'].value);
+        plotSizeY = parseInt(inputs['plotLength'].value);
+        unitSize = parseInt(inputs['unitSize'].value);
+
+        let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
+                    ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
+
+        scaledPlotSizeX = plotSizeX * scale;
+        scaledPlotSizeY = plotSizeY * scale;
+        scaledUnitSize = unitSize * scale;
+
+        gridTopLeft = p.createVector(
+            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+            scaledUnitSize/2
+        );
+
+        gridRows = plotSizeX / unitSize;
+        gridCols = plotSizeY / unitSize;
+
+        let initialGeneration = new Array(gridRows);
+        for (let i = 0; i < initialGeneration.length; i++) {
+            initialGeneration[i] = new Array(gridCols);
+        }
+
+        // office-residence
+        for (let i = 0; i < gridRows; i++) {
+            for (let j = 0; j < gridCols; j++) {
+                if (((i === 1) && (j === 4)) || ((i === 1) && (j === 5)) || ((i === 2) && (j === 4)) || ((i === 2) && (j === 5))) {
+                    initialGeneration[i][j] = 5;
+                }
+                else if (p.floor(p.random(2)) == 1) {
+                    initialGeneration[i][j] = 4;
+                }
+                else {
+                    initialGeneration[i][j] = 0;
+                }
+            }
+        }
+
+        automaton.initialise(gridRows, gridCols, false);
+        automaton.setInitialGeneration(initialGeneration);
+    }
+
+    function propagate() {
+        floors = parseInt(inputs['floors'].value);
+        wraparound = inputs['wraparound'].checked;
+
+        automaton.setWraparound(wraparound);
+        layerDrawTimer = setInterval(function() {automaton.computeNextGeneration()}, 100);
     }
 
     function drawGrid() {
