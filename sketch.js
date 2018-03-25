@@ -4,42 +4,13 @@ var unitSize = 9;
 var floors = 14;  
 var wraparound;  
 
-var cellTypes = {
-    0: {
-        name: 'empty',
-        color: '',
-        unit: 0
-    },
-
-    1: {
-        name: 'binary',
-        color: '#16a085',
-        unit: 1
-    },
-
-    2: {
-        name: 'residential-basic',
-        color: '#2ecc71',
-        unit: 9
-    },
-
-    3: {
-        name: 'residential-core',
-        color: '#16a085',
-        unit: 9
-    },
-
-    4: {
-        name: 'office-basic',
-        color: '#e67e22',
-        unit: 18
-    },
-
-    5: {
-        name: 'office-core',
-        color: '#d35400',
-        unit: 18
-    }
+var cellColors = {
+    0: '',
+    1: '#16a085',
+    2: '#2ecc71',
+    3: '#16a085',
+    4: '#e67e22',
+    5: '#d35400',
 };
 
 var sketch = function(p) {
@@ -287,7 +258,7 @@ var sketch = function(p) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
                     if (generations[layer][i][j] !== 0) {
-                        p.ambientMaterial(cellTypes[generations[layer][i][j]]['color']);
+                        p.ambientMaterial(cellColors[generations[layer][i][j]]);
                         p.box(scaledUnitSize);
                     }
                     p.translate(0, scaledUnitSize, 0);
