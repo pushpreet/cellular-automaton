@@ -142,7 +142,7 @@ function CellularAutomaton(rows, cols, wraparound) {
     this.getNeighbours = function(generation, row, col) {
         let neighbours = '';
         
-        if (wraparound) {
+        if (this.wraparound) {
             for (let i = -1; i < 2; i++) {
                 for (let j = -1; j < 2; j++) {
                     let x = (row + i + this.rows) % this.rows;

@@ -90,8 +90,6 @@ var sketch = function(p) {
         _left = 0 - canvasSizeX/2;
         _right = 0 + canvasSizeX/2;
         _bottom = 0 + canvasSizeY/2;
-
-        //layerDrawTimer = setInterval(function () {automaton.computeNextGeneration()}, 100);
     }
 
     p.windowResized = function() {
@@ -236,7 +234,7 @@ var sketch = function(p) {
     function propagate() {
         floors = parseInt(inputs['floors'].value);
         wraparound = inputs['wraparound'].checked;
-
+        
         automaton.setWraparound(wraparound);
         layerDrawTimer = setInterval(function() {automaton.computeNextGeneration()}, 100);
     }
