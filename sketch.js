@@ -1,45 +1,17 @@
-var plotSizeX = 45;
-var plotSizeY = 90;
-var unitSize = 9;
-var floors = 14;  
-var wraparound;  
+var plotSizeX;
+var plotSizeY;
+var unitSize;
+var floors;  
+var wraparound;
+var coreCellList;
 
-var cellTypes = {
-    0: {
-        name: 'empty',
-        color: '',
-        unit: 0
-    },
-
-    1: {
-        name: 'binary',
-        color: '#16a085',
-        unit: 1
-    },
-
-    2: {
-        name: 'residential-basic',
-        color: '#2ecc71',
-        unit: 9
-    },
-
-    3: {
-        name: 'residential-core',
-        color: '#16a085',
-        unit: 9
-    },
-
-    4: {
-        name: 'office-basic',
-        color: '#e67e22',
-        unit: 18
-    },
-
-    5: {
-        name: 'office-core',
-        color: '#d35400',
-        unit: 18
-    }
+var cellColors = {
+    0: '',
+    1: '#16a085',
+    2: '#2ecc71',
+    3: '#16a085',
+    4: '#e67e22',
+    5: '#d35400',
 };
 
 var sketch = function(p) {
@@ -210,6 +182,16 @@ var sketch = function(p) {
         plotSizeY = parseInt(inputs['plotLength'].value);
         unitSize = parseInt(inputs['unitSize'].value);
 
+        coreCellList = inputs['coreCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
+        
+        for (var i = 0; i < coreCellList.length; i++) {
+            coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
+
+            for (var j =0; j < coreCellList[i].length; j++) {
+                coreCellList[i][j] = parseInt(coreCellList[i][j]);
+            }
+        }
+
         let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
                     ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
 
@@ -234,16 +216,17 @@ var sketch = function(p) {
         // office-residence
         for (let i = 0; i < gridRows; i++) {
             for (let j = 0; j < gridCols; j++) {
-                if (((i === 1) && (j === 4)) || ((i === 1) && (j === 5)) || ((i === 2) && (j === 4)) || ((i === 2) && (j === 5))) {
-                    initialGeneration[i][j] = 5;
-                }
-                else if (p.floor(p.random(2)) == 1) {
+                if (p.floor(p.random(2)) == 1) {
                     initialGeneration[i][j] = 4;
                 }
                 else {
                     initialGeneration[i][j] = 0;
                 }
             }
+        }
+
+        for (let i = 0; i < coreCellList.length; i++) {
+            initialGeneration[coreCellList[i][0] - 1][coreCellList[i][1] - 1] = 5;
         }
 
         automaton.initialise(gridRows, gridCols, false);
@@ -287,7 +270,7 @@ var sketch = function(p) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
                     if (generations[layer][i][j] !== 0) {
-                        p.ambientMaterial(cellTypes[generations[layer][i][j]]['color']);
+                        p.ambientMaterial(cellColors[generations[layer][i][j]]);
                         p.box(scaledUnitSize);
                     }
                     p.translate(0, scaledUnitSize, 0);
