@@ -8,9 +8,9 @@
 
 	<title>automaton</title>
 
-	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
-<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/addons/p5.dom.js"></script>
 	<script src="cellular-automaton.js"></script>
@@ -90,13 +90,13 @@
 								</div>
 								<input id="inputMinVolFill" type="number" value=50 class="form-control" aria-label="Small" aria-describedby="inputGroup-sizing-sm">
 							</div>
-							<div class="btn-group dropdown col-lg-12 col-md-12 col-sm-4 col-xs-6">
-								<button type="button" class="btn btn-light btn-sm btn-block dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<div class="dropdown col-lg-12 col-md-12 col-sm-4 col-xs-6">
+								<button class="btn btn-light btn-sm btn-block dropdown-toggle" type="button" id="buttonRuleset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									Select Ruleset
 								</button>
-								<div class="dropdown-menu" x-placement="right-start" style="position: absolute; transform: translate3d(111px, 0px, 0px); top: 0px; left: 0px; will-change: transform;">
-									<a class="dropdown-item" href="#">game-of-life</a>
-									<a class="dropdown-item" href="#">simple-office-residence</a>
+								<div class="dropdown-menu" aria-labelledby="buttonRuleset" id="dropdownRuleset">
+									<button class="dropdown-item" value="1">game-of-life</button>
+									<button class="dropdown-item" value="2">simple-office-residence</button>
 								</div>
 							</div>
 							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-xs-6">
@@ -109,6 +109,9 @@
 								<input id="buttonPropagate" type="button" class="btn btn-light btn-sm" value="Propagate"/>
 							</div>
 						</div>
+					</div>
+
+					<div id="divAlertMessage" class="alert alert-danger alert-dismissable fixed-bottom col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display: none">
 					</div>
 
 				</div>

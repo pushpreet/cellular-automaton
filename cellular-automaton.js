@@ -1,10 +1,12 @@
-function CellularAutomaton(rows, cols, wraparound) {
+function CellularAutomaton(rows, cols, ruleset, wraparound) {
     if (typeof(rows) === 'undefined') rows = 10;
     if (typeof(cols) === 'undefined') cols = 10;
+    if (typeof(ruleset) === 'undefined') ruleset = 'game-of-life';
     if (typeof(wraparound) === 'undefined') wraparound = true;
 
     this.rows = rows;
     this.cols = cols;
+    this.ruleset = ruleset;
     this.wraparound = wraparound;
 
     this.generations = [];
@@ -27,6 +29,10 @@ function CellularAutomaton(rows, cols, wraparound) {
 
     this.setWraparound = function(wraparound) {
         this.wraparound = wraparound;
+    }
+
+    this.setRuleset = function(ruleset) {
+        this.ruleset = ruleset;
     }
 
     this.reset = function() {
@@ -67,7 +73,7 @@ function CellularAutomaton(rows, cols, wraparound) {
     
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
-                nextGeneration[row][col] = this.applyRules('simple-office-residence', lastGeneration, row, col);
+                nextGeneration[row][col] = this.applyRules(this.ruleset, lastGeneration, row, col);
             }
         }
         
@@ -93,7 +99,7 @@ function CellularAutomaton(rows, cols, wraparound) {
     
                 if (state === 0 && sumNeighbours === 3) {
                     return 1;
-                } else if (state === 1 && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                } else if (state > 0 && (sumNeighbours < 2 || sumNeighbours > 3)) {
                     return 0;
                 } else {
                     return state;
@@ -146,7 +152,6 @@ function CellularAutomaton(rows, cols, wraparound) {
     this.getNeighbours = function(generation, row, col) {
         let neighbours = '';
         
-        console.log(this.wraparound);
         if (this.wraparound) {
             for (let i = -1; i < 2; i++) {
                 for (let j = -1; j < 2; j++) {
@@ -182,7 +187,7 @@ function CellularAutomaton(rows, cols, wraparound) {
     
     
     this.countNeighbours = function(neighbours, cellType) {
-        if (typeof(cellType) === 'undefined') cellType = ['1'];
+        if (typeof(cellType) === 'undefined') cellType = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10'];
         else {
             for (let i = 0; i < cellType.length; i++) {
                 cellType[i] = cellType[i].toString();

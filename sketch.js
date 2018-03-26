@@ -3,7 +3,10 @@ var plotSizeY;
 var unitSize;
 var floors;  
 var wraparound;
+var ruleset;
 var coreCellList;
+
+var initialGenerationSet = false;
 
 var cellColors = {
     0: '',
@@ -44,7 +47,8 @@ var sketch = function(p) {
         'floors': null,
         'minFloorFill': null,
         'minVolFill': null,
-        'wraparound': false
+        'wraparound': false,
+        'ruleset': false
     }
 
     let buttons = {
@@ -78,6 +82,13 @@ var sketch = function(p) {
         inputs['minFloorFill'] = document.getElementById('inputMinFloorFill');
         inputs['minVolFill'] = document.getElementById('inputMinVolFill');
         inputs['wraparound'] = document.getElementById('inputWraparound');
+        inputs['ruleset'] = document.getElementById('buttonRuleset');
+
+        $("#dropdownRuleset button").click( function(e) {
+            e.preventDefault(); // cancel the link behaviour
+            var selText = $(this).text();
+            $("#buttonRuleset").text(selText);
+        });
 
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
@@ -229,16 +240,26 @@ var sketch = function(p) {
 
         automaton.initialise(gridRows, gridCols, false);
         automaton.setInitialGeneration(initialGeneration);
+        buttons['propagate'].value = 'Propagate';
+        initialGenerationSet = true;
     }
 
     function propagate() {
-        if (automaton.generations.length === 1 && buttons['propagate'].value === 'Propagate') {
+        if (initialGenerationSet === false) {
+            showAlert('danger', 'Set the initial generation first!');
+        }
+        else if ($("#buttonRuleset").text().indexOf('Select Ruleset') !== -1) {
+            showAlert('danger', 'Select the ruleset first!');
+        }
+        else if (buttons['propagate'].value === 'Propagate') {
             buttons['propagate'].value = 'Reset';
 
             floors = parseInt(inputs['floors'].value);
             wraparound = inputs['wraparound'].checked;
+            ruleset = $("#buttonRuleset").text();
             
             automaton.setWraparound(wraparound);
+            automaton.setRuleset(ruleset);
             layerDrawTimer = setInterval(function() {automaton.computeNextGeneration()}, 100);
         }
         else if (buttons['propagate'].value === 'Reset') {
@@ -246,6 +267,18 @@ var sketch = function(p) {
 
             automaton.reset();
         }
+    }
+
+    function showAlert(type, message) {
+        $("#divAlertMessage").removeClass( function (index, className) {
+            return (className.match (/(^|\s)alert-\S+/g) || []).join(' ');
+        });
+        $("#divAlertMessage").addClass('alert-' + type)
+        
+        $("#divAlertMessage").text(message);
+        $("#divAlertMessage").fadeTo(2000, 500).slideUp(500, function(){
+            $("#divAlertMessage").slideUp(500);
+        });
     }
 
     function drawGrid() {
