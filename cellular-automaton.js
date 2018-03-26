@@ -29,6 +29,10 @@ function CellularAutomaton(rows, cols, wraparound) {
         this.wraparound = wraparound;
     }
 
+    this.reset = function() {
+        this.generations = [this.generations[0]]
+    }
+
     this.setInitialGeneration = function(generation) {
         if (typeof(generation) === 'undefined') generation = 'random';
 

@@ -232,11 +232,20 @@ var sketch = function(p) {
     }
 
     function propagate() {
-        floors = parseInt(inputs['floors'].value);
-        wraparound = inputs['wraparound'].checked;
-        
-        automaton.setWraparound(wraparound);
-        layerDrawTimer = setInterval(function() {automaton.computeNextGeneration()}, 100);
+        if (automaton.generations.length === 1 && buttons['propagate'].value === 'Propagate') {
+            buttons['propagate'].value = 'Reset';
+
+            floors = parseInt(inputs['floors'].value);
+            wraparound = inputs['wraparound'].checked;
+            
+            automaton.setWraparound(wraparound);
+            layerDrawTimer = setInterval(function() {automaton.computeNextGeneration()}, 100);
+        }
+        else if (buttons['propagate'].value === 'Reset') {
+            buttons['propagate'].value = 'Propagate';
+
+            automaton.reset();
+        }
     }
 
     function drawGrid() {
