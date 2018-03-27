@@ -83,7 +83,7 @@ var sketch = function(p) {
         inputs['minVolFill'] = document.getElementById('inputMinVolFill');
         inputs['wraparound'] = document.getElementById('inputWraparound');
         inputs['ruleset'] = document.getElementById('buttonRuleset');
-
+        
         $("#dropdownRuleset button").click( function(e) {
             e.preventDefault(); // cancel the link behaviour
             var selText = $(this).text();

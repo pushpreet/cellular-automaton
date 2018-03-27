@@ -11,6 +11,11 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
 
     this.generations = [];
 
+    this.rulesets = [
+        'game-of-life',
+        'simple-office-residence',
+    ]
+
     this.make2DArray = function() {
         let arr = new Array(this.rows);
         for (let row = 0; row < arr.length; row++) {
