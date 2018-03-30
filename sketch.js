@@ -79,8 +79,6 @@ var sketch = function(p) {
         inputs['unitSize'] = document.getElementById('inputUnitSize');
         inputs['coreCells'] = document.getElementById('inputCoreCells');
         inputs['floors'] = document.getElementById('inputFloors');
-        inputs['minFloorFill'] = document.getElementById('inputMinFloorFill');
-        inputs['minVolFill'] = document.getElementById('inputMinVolFill');
         inputs['wraparound'] = document.getElementById('inputWraparound');
         inputs['ruleset'] = document.getElementById('buttonRuleset');
         

@@ -65,3 +65,7 @@ label {
     margin-left: 5%;
     width: 90%;
 }
+
+.form-control:disabled{
+    background-color: lightgrey;
+}

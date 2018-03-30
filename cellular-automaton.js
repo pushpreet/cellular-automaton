@@ -112,6 +112,21 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
     
                 break;
             }
+
+            case 'crooked-game-of-life': {
+                let state = generation[row][col];
+                let sumNeighbours = this.countNeighbours(this.getNeighbours(generation, row, col));
+    
+                if (state === 0 && sumNeighbours === 4) {
+                    return 1;
+                } else if (state > 0 && (sumNeighbours < 3 || sumNeighbours > 4)) {
+                    return 0;
+                } else {
+                    return state;
+                }
+    
+                break;
+            }
     
             case 'simple-office-residence': {
                 let state = generation[row][col];
