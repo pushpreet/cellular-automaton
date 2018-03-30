@@ -4,7 +4,7 @@ var unitSize;
 var floors;  
 var wraparound;
 var ruleset;
-var coreCellList;
+var coreCellList = [];
 
 var initialGenerationSet = false;
 
@@ -69,10 +69,14 @@ var sketch = function(p) {
         easycam = p.createEasyCam(
             {
                 distance: 1200, 
-                center: [0, 0, 300], 
-                rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303]
+                center: [0, 0, 300],
+                rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303],
             }
         );
+
+        //easycam.removeMouseListeners();
+        easycam.setDistanceMin(500);
+        easycam.setDistanceMax(2500);
 
         inputs['plotWidth'] = document.getElementById('inputPlotWidth');
         inputs['plotLength'] = document.getElementById('inputPlotLength');
@@ -81,6 +85,10 @@ var sketch = function(p) {
         inputs['floors'] = document.getElementById('inputFloors');
         inputs['wraparound'] = document.getElementById('inputWraparound');
         inputs['ruleset'] = document.getElementById('buttonRuleset');
+
+        for (let i = 0; i < automaton.rulesets.length; i++) {
+            $("#dropdownRuleset").append('<button class="dropdown-item btn-sm" value="' + i + '">' + automaton.rulesets[i] + '</button>');
+        }
         
         $("#dropdownRuleset button").click( function(e) {
             e.preventDefault(); // cancel the link behaviour
@@ -189,13 +197,15 @@ var sketch = function(p) {
         plotSizeY = parseInt(inputs['plotLength'].value);
         unitSize = parseInt(inputs['unitSize'].value);
 
-        coreCellList = inputs['coreCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
-        
-        for (var i = 0; i < coreCellList.length; i++) {
-            coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
-
-            for (var j =0; j < coreCellList[i].length; j++) {
-                coreCellList[i][j] = parseInt(coreCellList[i][j]);
+        if (inputs['coreCells'].value.length !== 0) {
+            coreCellList = inputs['coreCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
+            
+            for (var i = 0; i < coreCellList.length; i++) {
+                coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
+    
+                for (var j =0; j < coreCellList[i].length; j++) {
+                    coreCellList[i][j] = parseInt(coreCellList[i][j]);
+                }
             }
         }
 
@@ -282,7 +292,7 @@ var sketch = function(p) {
     function drawGrid() {
         p.stroke('#7f8c8d');
         p.strokeWeight(2);
-            
+
         for (let i = 0; i < gridRows + 1; i++) {
             let x = i * scaledUnitSize;
 
