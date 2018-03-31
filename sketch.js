@@ -66,7 +66,7 @@ var sketch = function(p) {
             {
                 distance: 1200, 
                 center: [0, 0, 300],
-                rotation: [-0.73657645671131, -0.473425444805009, 0.22421945906390903, -0.4278423843039303],
+                rotation: [0.3955558365025657, 0.22224625704153442, 0.4815524507003048, -0.7498329271673162],
             }
         );
 
@@ -418,18 +418,21 @@ var sketch = function(p) {
     }
 
     function drawGrid() {
-        p.stroke('#7f8c8d');
         p.strokeWeight(2);
 
         for (let i = 0; i < gridRows + 1; i++) {
             let x = i * scaledUnitSize;
-
+            if (i === 0) p.stroke('#e74c3c');
+            else p.stroke('#7f8c8d');
             p.line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
                     (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
         }
 
         for (let j = 0; j < gridCols + 1; j++) {
             let y = j * scaledUnitSize;
+
+            if (j === 0) p.stroke('#3498db');
+            else p.stroke('#7f8c8d');
 
             p.line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
                     (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
