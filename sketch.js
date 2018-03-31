@@ -65,8 +65,9 @@ var sketch = function(p) {
         easycam = p.createEasyCam(
             {
                 distance: 1200, 
-                center: [0, 0, 300],
-                rotation: [0.3955558365025657, 0.22224625704153442, 0.4815524507003048, -0.7498329271673162],
+                center: [0, 0, 350],
+                rotation: [0.373774147330301, 0.2267155863804119, 0.4680836446901702, -0.7679782752482324],
+                //rotation: [0.5, 0.5, 0.5, -0.5],
             }
         );
 
@@ -171,6 +172,8 @@ var sketch = function(p) {
 
         if (automaton.generations.length > 0) drawLayers(automaton.generations, renderedLayerStart, renderedLayerEnd);
         if (automaton.generations.length === floors) clearInterval(layerDrawTimer);
+
+        //console.log(easycam.getRotation());
     }
 
     p.mouseWheel = function(event) {

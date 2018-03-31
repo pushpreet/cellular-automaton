@@ -638,9 +638,9 @@ class EasyCam {
   
   /** implemented zoom-cb for mousedrag/touch handler.*/
   mouseDragZoom() {
-    var cam = this;
-    var mouse = cam.mouse;
-    cam.dampedZoom.addForce(-mouse.dist[2]);
+    //var cam = this;
+    //var mouse = cam.mouse;
+    //cam.dampedZoom.addForce(-mouse.dist[2]);
   }
   
   /** implemented pan-cb for mousedrag/touch handler.*/
@@ -674,6 +674,13 @@ class EasyCam {
       cam.dampedRotZ.addForce(-dx * myNdc);
       cam.dampedRotZ.addForce(+dy * mxNdc);
     }
+
+    // if (cam.DRAG_CONSTRAINT & cam.AXIS.YAW) {
+    //   cam.dampedRotY.addForce(+dx * (1.0 - dy * dy));
+    // }
+    // if (cam.DRAG_CONSTRAINT & cam.AXIS.PITCH) {
+    //   cam.dampedRotX.addForce(-dy * (1.0 - dx * dx));
+    // }
   }
   
   
