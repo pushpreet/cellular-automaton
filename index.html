@@ -114,8 +114,9 @@
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
 						<div class="row">
 							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-								<h6 style="color: white; font-family: Lato">Draw Controls</h6>
+								<h6 style="color: white; font-family: Lato">Render Controls</h6>
 							</div>
+
 							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 								<input class="form-check-input" type="checkbox" value="" id="inputSingleFloor" style="margin-left:0px;">
 								<label class="form-check-label" for="inputSingleFloor" style="padding-left:20px; font-family:Lato; font-size:14px">
@@ -130,16 +131,26 @@
 							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
 								<input id="floorSlider" data-slider-id='sliderFloor' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="1" data-slider-enabled="false"/>
 							</div>
+
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<label id="cellDrawScaleValue" class="form-check-label" style="font-family:Lato; font-size:14px">
+									Cell Draw Scale: 1.0x
+								</label>
+							</div>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<input id="cellDrawScaleSlider" data-slider-id='sliderCellDrawScale' type="text" data-slider-min="1" data-slider-max="2" data-slider-step="0.1" data-slider-value="1" data-slider-enabled="true"/>
+							</div>
 						</div>
 					</div>
 
 					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
 						<div class="row">
 							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-								<h6 style="color: white; font-family: Lato">Export Options</h6>
+								<h6 style="color: white; font-family: Lato">Export</h6>
 							</div>
 							
 							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<input id="buttonExportCAD" type="button" class="btn btn-light btn-sm" value="Export CAD" disabled/>
 								<input id="buttonExportLayers" type="button" class="btn btn-light btn-sm" value="Export Layers"/>
 							</div>
 						</div>

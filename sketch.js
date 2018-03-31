@@ -34,6 +34,8 @@ var sketch = function(p) {
     var scaledPlotSizeY;
     var scaledUnitSize;
 
+    var cellDrawScale = 1;
+
     let gridRows;
     let gridCols;
 
@@ -120,6 +122,17 @@ var sketch = function(p) {
             else {
                 renderedLayerStart = 0;
             }
+        });
+
+        $('#cellDrawScaleSlider').bootstrapSlider({
+            formatter: function(value) {
+                return 'Current value: ' + value;
+            }
+        });
+
+        $('#cellDrawScaleSlider').on("slide", function(slideEvt) {
+            $("#cellDrawScaleValue").text("Cell Draw Scale: " + slideEvt.value.toPrecision(2) + 'x');
+            cellDrawScale = slideEvt.value.toPrecision(2);
         });
 
         mainWindowPadding = canvasSizeY/10;
@@ -230,6 +243,9 @@ var sketch = function(p) {
                 }
             }
         }
+        else {
+            coreCellList = [];
+        }
 
         if (inputs['deadCells'].value.length !== 0) {
             deadCellList = inputs['deadCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
@@ -268,7 +284,7 @@ var sketch = function(p) {
         for (let i = 0; i < gridRows; i++) {
             for (let j = 0; j < gridCols; j++) {
                 if (p.floor(p.random(2)) == 1) {
-                    initialGeneration[i][j] = 4;
+                    initialGeneration[i][j] = 1;
                 }
                 else {
                     initialGeneration[i][j] = 0;
@@ -428,14 +444,15 @@ var sketch = function(p) {
         if (layerStart === -1) layerStart = layerEnd - 1;
         if (layerStart < 0) layerStart = 0;
 
+        p.stroke('#000000');
+        p.strokeWeight(2);
         p.translate(gridTopLeft.x, gridTopLeft.y, gridTopLeft.z + (scaledUnitSize * layerStart));
-
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
                     if (generations[layer][i][j] > 0) {
                         p.ambientMaterial(cellColors[generations[layer][i][j]]);
-                        p.box(scaledUnitSize);
+                        p.box(scaledUnitSize * cellDrawScale, scaledUnitSize * cellDrawScale, scaledUnitSize);
                     }
                     p.translate(0, scaledUnitSize, 0);
                 }
