@@ -98,11 +98,14 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
     }
 
     this.applyRules = function(ruleSet, generation, row, col) {
+        let state = generation[row][col];
+        if (state === -1) return -1;
+        
         switch (ruleSet) {
             case 'game-of-life': {
-                let state = generation[row][col];
+                
                 let sumNeighbours = this.countNeighbours(this.getNeighbours(generation, row, col));
-    
+                
                 if (state === 0 && sumNeighbours === 3) {
                     return 1;
                 } else if (state > 0 && (sumNeighbours < 2 || sumNeighbours > 3)) {
@@ -115,7 +118,6 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
             }
 
             case 'crooked-game-of-life': {
-                let state = generation[row][col];
                 let sumNeighbours = this.countNeighbours(this.getNeighbours(generation, row, col));
     
                 if (state === 0 && sumNeighbours === 4) {
@@ -130,7 +132,6 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
             }
     
             case 'simple-office-residence': {
-                let state = generation[row][col];
                 let neighbours = this.getNeighbours(generation, row, col);
     
                 if (this.generations.length < 8) {
@@ -169,7 +170,6 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
             }
 
             case 'sheet-000': {
-                let state = generation[row][col];
                 let neighbours = this.getNeighbours(generation, row, col);
 
                 let born = [
@@ -214,7 +214,12 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
                     let y = (col + j + this.cols) % this.cols;
                     
                     if (i !== 0 || j !== 0) {
+                        if (generation[x][y] === -1) {
+                            neighbours += '0';
+                        }
+                        else {
                             neighbours += generation[x][y].toString();
+                        }
                     }
                 }
             }
@@ -229,12 +234,15 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
                         if (x < 0 || y < 0 || x >= this.rows || y >= this.cols) {
                             neighbours += '0';
                         }
+                        else if (generation[x][y] === -1) {
+                            neighbours += '0';
+                        }
                         else {
                             neighbours += generation[x][y].toString();
                         }
                     }
                 }
-            }            
+            }
         }
     
         return neighbours;

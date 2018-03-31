@@ -5,6 +5,7 @@ var floors;
 var wraparound;
 var ruleset;
 var coreCellList = [];
+var deadCellList = [];
 
 var initialGenerationSet = false;
 
@@ -44,6 +45,7 @@ var sketch = function(p) {
         'plotLength': null,
         'unitSize': null,
         'coreCells': null,
+        'deadCells': null,
         'floors': null,
         'minFloorFill': null,
         'minVolFill': null,
@@ -82,6 +84,7 @@ var sketch = function(p) {
         inputs['plotLength'] = document.getElementById('inputPlotLength');
         inputs['unitSize'] = document.getElementById('inputUnitSize');
         inputs['coreCells'] = document.getElementById('inputCoreCells');
+        inputs['deadCells'] = document.getElementById('inputDeadCells');
         inputs['floors'] = document.getElementById('inputFloors');
         inputs['wraparound'] = document.getElementById('inputWraparound');
         inputs['ruleset'] = document.getElementById('buttonRuleset');
@@ -209,6 +212,18 @@ var sketch = function(p) {
             }
         }
 
+        if (inputs['deadCells'].value.length !== 0) {
+            deadCellList = inputs['deadCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
+            
+            for (var i = 0; i < deadCellList.length; i++) {
+                deadCellList[i] = deadCellList[i].match(/\(([^)]+)\)/)[1].split(',');
+    
+                for (var j =0; j < deadCellList[i].length; j++) {
+                    deadCellList[i][j] = parseInt(deadCellList[i][j]);
+                }
+            }
+        }
+
         let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
                     ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
 
@@ -244,6 +259,11 @@ var sketch = function(p) {
 
         for (let i = 0; i < coreCellList.length; i++) {
             initialGeneration[coreCellList[i][0] - 1][coreCellList[i][1] - 1] = 5;
+        }
+
+        console.log(deadCellList);
+        for (let i = 0; i < deadCellList.length; i++) {
+            initialGeneration[deadCellList[i][0] - 1][deadCellList[i][1] - 1] = -1;
         }
 
         automaton.initialise(gridRows, gridCols, false);
@@ -317,7 +337,7 @@ var sketch = function(p) {
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
-                    if (generations[layer][i][j] !== 0) {
+                    if (generations[layer][i][j] > 0) {
                         p.ambientMaterial(cellColors[generations[layer][i][j]]);
                         p.box(scaledUnitSize);
                     }
