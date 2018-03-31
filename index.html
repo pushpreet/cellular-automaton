@@ -8,17 +8,25 @@
 
 	<title>automaton</title>
 
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://code.jquery.com/jquery-3.3.1.min.js" integrity="sha256-FgpCb/KJQlLNfOu91ta32o/NMZxltwRo8QtmkMRdAu8=" crossorigin="anonymous"></script>
+	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/p5.js"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.6.0/addons/p5.dom.js"></script>
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/bootstrap-slider.min.js"></script>
+	
+	
 	<script src="cellular-automaton.js"></script>
 	<script src="sketch.js"></script>
 	<script src="libraries/p5.easycam.js"></script>
 
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato" />
+	<link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Lato">
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-slider/10.0.0/css/bootstrap-slider.min.css">
 	<link rel="stylesheet" href="style.css">
 </head>
 
@@ -93,12 +101,34 @@
 							</div>
 							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-xs-6">
 								<input class="form-check-input" type="checkbox" value="" id="inputWraparound" style="margin-left:0px;">
-								<label class="form-check-label" for="inputWraparound" style="padding-left:20px; font-family:Lato;">
+								<label class="form-check-label" for="inputWraparound" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Wraparound
 								</label>
 							</div>
 							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
 								<input id="buttonPropagate" type="button" class="btn btn-light btn-sm" value="Propagate"/>
+							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
+						<div class="row">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<h6 style="color: white; font-family: Lato">Draw Controls</h6>
+							</div>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<input class="form-check-input" type="checkbox" value="" id="inputSingleFloor" style="margin-left:0px;">
+								<label class="form-check-label" for="inputSingleFloor" style="padding-left:20px; font-family:Lato; font-size:14px">
+									Single Floor
+								</label>
+							</div>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<label id="floorSliderValue" class="form-check-label" style="font-family:Lato; font-size:14px">
+									Floor: 1
+								</label>
+							</div>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+								<input id="floorSlider" data-slider-id='sliderFloor' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="1" data-slider-enabled="false"/>
 							</div>
 						</div>
 					</div>

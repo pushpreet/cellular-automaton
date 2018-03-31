@@ -38,6 +38,9 @@ var sketch = function(p) {
 
     var automaton = new CellularAutomaton();
 
+    var renderedLayerStart = 0;
+    var renderedLayerEnd = 1;
+
     var easycam;
 
     let inputs = {
@@ -87,6 +90,7 @@ var sketch = function(p) {
         inputs['deadCells'] = document.getElementById('inputDeadCells');
         inputs['floors'] = document.getElementById('inputFloors');
         inputs['wraparound'] = document.getElementById('inputWraparound');
+        inputs['singleFloor'] = document.getElementById('inputSingleFloor');
         inputs['ruleset'] = document.getElementById('buttonRuleset');
 
         for (let i = 0; i < automaton.rulesets.length; i++) {
@@ -104,6 +108,26 @@ var sketch = function(p) {
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
+
+        $('#floorSlider').bootstrapSlider({
+            formatter: function(value) {
+                return 'Current value: ' + value;
+            }
+        });
+
+        $('#floorSlider').on("slide", function(slideEvt) {
+            $("#floorSliderValue").text("Floor: " + slideEvt.value);
+            renderedLayerEnd = slideEvt.value;
+        });
+
+        $('#inputSingleFloor').click(function() {
+            if (this.checked) {
+                renderedLayerStart = -1;
+            }
+            else {
+                renderedLayerStart = 0;
+            }
+        });
 
         mainWindowPadding = canvasSizeY/10;
         _top = 0 - canvasSizeY/2;
@@ -137,7 +161,7 @@ var sketch = function(p) {
         setLights();
         drawGrid();
 
-        if (automaton.generations.length > 0) drawLayers(automaton.generations);
+        if (automaton.generations.length > 0) drawLayers(automaton.generations, renderedLayerStart, renderedLayerEnd);
         if (automaton.generations.length === floors) clearInterval(layerDrawTimer);
     }
 
@@ -261,11 +285,12 @@ var sketch = function(p) {
             initialGeneration[coreCellList[i][0] - 1][coreCellList[i][1] - 1] = 5;
         }
 
-        console.log(deadCellList);
         for (let i = 0; i < deadCellList.length; i++) {
             initialGeneration[deadCellList[i][0] - 1][deadCellList[i][1] - 1] = -1;
         }
 
+        $('#floorSlider').bootstrapSlider({max: 1, value: 1});
+        $('#floorSlider').bootstrapSlider("disable");
         automaton.initialise(gridRows, gridCols, false);
         automaton.setInitialGeneration(initialGeneration);
         buttons['propagate'].value = 'Propagate';
@@ -286,12 +311,21 @@ var sketch = function(p) {
             wraparound = inputs['wraparound'].checked;
             ruleset = $("#buttonRuleset").text();
             
+            renderedLayerEnd = floors;
+
+            $("#floorSliderValue").text("Floor: " + floors);
+            $('#floorSlider').bootstrapSlider({max: floors, value: floors});
+            $('#floorSlider').bootstrapSlider("enable");
+
             automaton.setWraparound(wraparound);
             automaton.setRuleset(ruleset);
             layerDrawTimer = setInterval(function() {automaton.computeNextGeneration()}, 100);
         }
         else if (buttons['propagate'].value === 'Reset') {
             buttons['propagate'].value = 'Propagate';
+
+            $('#floorSlider').bootstrapSlider({max: 1, value: 1});
+            $('#floorSlider').bootstrapSlider("disable");
 
             automaton.reset();
         }
@@ -330,7 +364,11 @@ var sketch = function(p) {
 
     function drawLayers(generations, layerStart, layerEnd) {
         if (typeof(layerStart) === 'undefined') layerStart = 0;
-        if (typeof(layerEnd) === 'undefined') layerEnd = generations.length;
+        if (typeof(layerEnd) === 'undefined') layerEnd = layerStart + 1;
+        
+        if (layerEnd > generations.length) layerEnd = generations.length;
+        if (layerStart === -1) layerStart = layerEnd - 1;
+        if (layerStart < 0) layerStart = 0;
 
         p.translate(gridTopLeft.x, gridTopLeft.y, gridTopLeft.z + (scaledUnitSize * layerStart));
 

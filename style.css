@@ -69,3 +69,11 @@ label {
 .form-control:disabled{
     background-color: lightgrey;
 }
+
+.slider-selection {
+	background: #BABABA;
+}
+
+.slider-handle {
+    background: #2980b9;
+}
