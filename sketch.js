@@ -30,6 +30,10 @@ var sketch = function(p) {
     let _bottom;
     let gridTopLeft;
 
+    var scaledPlotSizeX;
+    var scaledPlotSizeY;
+    var scaledUnitSize;
+
     let gridRows;
     let gridCols;
 
@@ -43,23 +47,8 @@ var sketch = function(p) {
 
     var easycam;
 
-    let inputs = {
-        'plotWidth': null,
-        'plotLength': null,
-        'unitSize': null,
-        'coreCells': null,
-        'deadCells': null,
-        'floors': null,
-        'minFloorFill': null,
-        'minVolFill': null,
-        'wraparound': false,
-        'ruleset': false
-    }
-
-    let buttons = {
-        'setInitial': null,
-        'propagate': null
-    }
+    let inputs = {};
+    let buttons = {};
 
     p.setup = function() {
         p.pixelDensity(1);
@@ -105,9 +94,13 @@ var sketch = function(p) {
 
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
+        buttons['exportLayers'] = document.getElementById('buttonExportLayers');
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
+        buttons['exportLayers'].onclick = exportLayers;
+
+        $('#buttonExportLayers').prop('disabled', true);
 
         $('#floorSlider').bootstrapSlider({
             formatter: function(value) {
@@ -141,7 +134,7 @@ var sketch = function(p) {
         canvasSizeY = mainWindow.clientHeight-3;
 
         p.resizeCanvas(canvasSizeX, canvasSizeY);
-        easycam.setViewport([0,0,windowWidth, windowHeight]);
+        easycam.setViewport([0, 0, p.windowWidth, p.windowHeight]);
 
         mainWindowPadding = canvasSizeY/10;
         _top = 0 - canvasSizeY/2;
@@ -149,11 +142,13 @@ var sketch = function(p) {
         _right = 0 + canvasSizeX/2;
         _bottom = 0 + canvasSizeY/2;
 
-        gridTopLeft = set(
-            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-            scaledUnitSize/2
-        );
+        if (initialGenerationSet) {
+            gridTopLeft = p.createVector(
+                (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+                (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+                scaledUnitSize/2
+            );
+        }
     }
 
     p.draw = function() {
@@ -291,6 +286,8 @@ var sketch = function(p) {
 
         $('#floorSlider').bootstrapSlider({max: 1, value: 1});
         $('#floorSlider').bootstrapSlider("disable");
+        $('#buttonExportLayers').prop('disabled', true);
+
         automaton.initialise(gridRows, gridCols, false);
         automaton.setInitialGeneration(initialGeneration);
         buttons['propagate'].value = 'Propagate';
@@ -316,6 +313,7 @@ var sketch = function(p) {
             $("#floorSliderValue").text("Floor: " + floors);
             $('#floorSlider').bootstrapSlider({max: floors, value: floors});
             $('#floorSlider').bootstrapSlider("enable");
+            $('#buttonExportLayers').prop('disabled', false);
 
             automaton.setWraparound(wraparound);
             automaton.setRuleset(ruleset);
@@ -326,9 +324,69 @@ var sketch = function(p) {
 
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
+            $('#buttonExportLayers').prop('disabled', true);
 
             automaton.reset();
         }
+    }
+
+    function exportLayers() {
+        var layerData = '';
+
+        for (let layer = 0; layer < automaton.generations.length; layer++) {
+            layerData += 'Floor ' + (layer + 1) + '\n';
+            for (let j = 0; j < automaton.generations[0][0].length; j++) {
+                layerData += '---';
+            }
+
+            layerData += '\n';
+
+            for (let i = 0; i < automaton.generations[layer].length; i++) {
+                
+                for (let j = 0; j < automaton.generations[layer][i].length; j++) {
+                    if (automaton.generations[layer][i][j] === 0) {
+                        layerData += ' - ';
+                    }
+                    else {
+                        //layerData += automaton.generations[layer][i][j];
+                        layerData += ' x ';
+                    }
+                }
+                layerData += '\n';
+            }
+
+            for (let j = 0; j < automaton.generations[0][0].length; j++) {
+                layerData += '---';
+            }
+
+            layerData += '\n\n';
+        }
+
+        var pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(layerData));
+        pom.setAttribute('download', ruleset + '-' + getFormattedDate() + '.txt');
+
+        if (document.createEvent) {
+            var event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            pom.dispatchEvent(event);
+        }
+        else {
+            pom.click();
+        }
+    }
+
+    function getFormattedDate() {
+        var d = new Date();
+
+        var month = d.getMonth()+1;
+        var day = d.getDate();
+
+        var output = d.getFullYear() + '/' +
+            (month<10 ? '0' : '') + month + '/' +
+            (day<10 ? '0' : '') + day;
+
+        return output;
     }
 
     function showAlert(type, message) {
