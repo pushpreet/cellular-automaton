@@ -33,135 +33,137 @@
 <body>
 	<div class="container-fluid fill">
 		<div class="row fill">
-			<div id="menu" class="container col-lg-2 col-md-3 col-sm-12 col-xs-12 order-lg-2 order-md-2">
+			<div id="menu" class="container col-lg-2 col-md-3 col-sm-12 col-12 order-lg-2 order-md-2">
 				<div class="row" style="font-family: Lato;">
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 						<h4 style="color: white;">Cellular Automaton</h4>
 						<hr size=3px style="border-color: white">
 					</div>
 
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px;">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px;">
 						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<h6 style="color: white;">Initial Generation</h6>
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
 								<div class="input-group-prepend">
 									<span class="input-group-text">Footprint Y</span>
 								</div>
 								<input id="inputPlotWidth" type="number" value=100 class="form-control">
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Footprint X</span>
 								</div>
 								<input id="inputPlotLength" type="number" value=100 class="form-control">
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Unit Size</span>
 								</div>
 								<input id="inputUnitSize" type="number" value=10 class="form-control">
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Core Cells</span>
 								</div>
 								<input id="inputCoreCells" type="text" value="(5,5), (5,6), (6,5), (6,6)" class="form-control">
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Dead Cells</span>
 								</div>
 								<input id="inputDeadCells" type="text" value="" class="form-control">
 							</div>
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
 								<input id="buttonSetInitial" type="button" class="btn btn-light btn-sm" value="Set Initial"/>
 							</div>
 						</div>
 					</div>
 
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px">
 						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<h6 style="color: white;">Propagation</h6>
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Floors</span>
 								</div>
 								<input id="inputFloors" type="number" value=14 class="form-control">
 							</div>
-							<div class="dropdown col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="dropdown col-lg-12 col-md-12 col-sm-4 col-6">
 								<button class="btn btn-light btn-sm btn-block dropdown-toggle" type="button" id="buttonRuleset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
 									Select Ruleset
 								</button>
 								<div class="dropdown-menu" aria-labelledby="buttonRuleset" id="dropdownRuleset">
 								</div>
 							</div>
-							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-xs-6">
+							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-6">
 								<input class="form-check-input" type="checkbox" value="" id="inputWraparound" style="margin-left:0px;">
 								<label class="form-check-label" for="inputWraparound" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Wraparound
 								</label>
 							</div>
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
 								<input id="buttonPropagate" type="button" class="btn btn-light btn-sm" value="Propagate"/>
 							</div>
 						</div>
 					</div>
 
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px">
 						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<h6 style="color: white;">Render Controls</h6>
 							</div>
 
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<input class="form-check-input" type="checkbox" value="" id="inputSingleFloor" style="margin-left:0px;">
 								<label class="form-check-label" for="inputSingleFloor" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Single Floor
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<label id="floorSliderValue" class="form-check-label" style="font-family:Lato; font-size:14px">
 									Floor: 1
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<input id="floorSlider" data-slider-id='sliderFloor' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="1" data-slider-enabled="false"/>
 							</div>
 
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<label id="cellDrawScaleValue" class="form-check-label" style="font-family:Lato; font-size:14px">
 									Cell Draw Scale: 1.0x
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<input id="cellDrawScaleSlider" data-slider-id='sliderCellDrawScale' type="text" data-slider-min="1" data-slider-max="2" data-slider-step="0.1" data-slider-value="1" data-slider-enabled="true"/>
 							</div>
 						</div>
 					</div>
 
-					<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12" style="padding-bottom:15px">
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px">
 						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
 								<h6 style="color: white;">Export</h6>
 							</div>
 							
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-xs-12">
-								<input id="buttonExportCAD" type="button" class="btn btn-light btn-sm" value="Export CAD" disabled/>
-								<input id="buttonExportLayers" type="button" class="btn btn-light btn-sm" value="Export Layers"/>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+								<div class="d-flex flex-row justify-content-end flex-wrap">
+									<div style="padding-left:6px; padding-top:3px; padding-bottom:3px;"><input id="buttonExportCAD" type="button" class="btn btn-light btn-sm" value="Export CAD" disabled/></div>
+									<div style="padding-left:6px; padding-top:3px; padding-bottom:3px;"><input id="buttonExportLayers" type="button" class="btn btn-light btn-sm" value="Export Layers"/></div>
+								</div>
 							</div>
 						</div>
 					</div>
 
-					<div id="divAlertMessage" class="alert alert-danger alert-dismissable fixed-bottom col-lg-12 col-md-12 col-sm-12 col-xs-12" style="display: none">
+					<div id="divAlertMessage" class="alert alert-danger alert-dismissable fixed-bottom col-lg-12 col-md-12 col-sm-12 col-12" style="display: none">
 					</div>
 				</div>
 			</div>
 
-			<div id="main-window" class="col-lg-10 col-md-9 col-sm-12 col-xs-12 order-lg-1 order-md-1 padding-0">
+			<div id="main-window" class="col-lg-10 col-md-9 col-sm-12 col-12 order-lg-1 order-md-1 padding-0">
 			</div>	
 		</div>
 	</div>
