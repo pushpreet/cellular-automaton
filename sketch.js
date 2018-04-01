@@ -170,6 +170,8 @@ var sketch = function(p) {
         setLights();
         drawGrid();
 
+        setGridParameters();
+
         if (automaton.generations.length > 0) drawLayers(automaton.generations, renderedLayerStart, renderedLayerEnd);
         if (automaton.generations.length === floors) clearInterval(layerDrawTimer);
 
@@ -228,13 +230,31 @@ var sketch = function(p) {
         this.reset()
     }
 
-    function setInitialParameters() {
-        clearInterval(layerDrawTimer);
-
+    function setGridParameters() {
         plotSizeX = parseInt(inputs['plotWidth'].value);
         plotSizeY = parseInt(inputs['plotLength'].value);
         unitSize = parseInt(inputs['unitSize'].value);
 
+        let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
+                    ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
+
+        scaledPlotSizeX = plotSizeX * scale;
+        scaledPlotSizeY = plotSizeY * scale;
+        scaledUnitSize = unitSize * scale;
+
+        gridTopLeft = p.createVector(
+            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
+            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+            scaledUnitSize/2
+        );
+
+        gridRows = plotSizeX / unitSize;
+        gridCols = plotSizeY / unitSize;
+    }
+
+    function setInitialParameters() {
+        clearInterval(layerDrawTimer);
+        
         if (inputs['coreCells'].value.length !== 0) {
             coreCellList = inputs['coreCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
             
@@ -261,22 +281,6 @@ var sketch = function(p) {
                 }
             }
         }
-
-        let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
-                    ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
-
-        scaledPlotSizeX = plotSizeX * scale;
-        scaledPlotSizeY = plotSizeY * scale;
-        scaledUnitSize = unitSize * scale;
-
-        gridTopLeft = p.createVector(
-            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
-            scaledUnitSize/2
-        );
-
-        gridRows = plotSizeX / unitSize;
-        gridCols = plotSizeY / unitSize;
 
         let initialGeneration = new Array(gridRows);
         for (let i = 0; i < initialGeneration.length; i++) {
