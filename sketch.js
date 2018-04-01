@@ -291,7 +291,7 @@ var sketch = function(p) {
         for (let i = 0; i < gridRows; i++) {
             for (let j = 0; j < gridCols; j++) {
                 if (p.floor(p.random(2)) == 1) {
-                    initialGeneration[i][j] = 1;
+                    initialGeneration[i][j] = 4;
                 }
                 else {
                     initialGeneration[i][j] = 0;

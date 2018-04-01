@@ -172,6 +172,15 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
             case 'sheet-000': {
                 let neighbours = this.getNeighbours(generation, row, col);
 
+                if (this.generations.length < 8) {
+                    if (state === 5) return 5;
+                }
+                else  {
+                    if ((neighbours[0] === '5') && (neighbours[1] === '5') && (neighbours[3] == '5') || (state === 3)) {
+                        return 3;
+                    }
+                }
+
                 let born = [
                     '1278', '2367', '3456', '1458',
                     '1267', '2378', '1345', '4568',
@@ -193,11 +202,13 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
                     '2356', '1248', '3467', '1578'];
 
                 if (state === 0 && this.isNeighbourAlive(neighbours, born))
-                    return 1;
+                    return (this.generations.length < 8) ? 4 : 2;
                 else if (state !== 0 && this.isNeighbourAlive(neighbours, dead))
                     return 0;
-                else
-                    return state;
+                else {
+                    if (state === 0) return 0;
+                    else return (this.generations.length < 8) ? 4 : 2;
+                }
 
                 break;
             }
