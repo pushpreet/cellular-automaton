@@ -4,19 +4,26 @@ var unitSize;
 var floors;  
 var wraparound;
 var ruleset;
-var coreCellList = [];
-var deadCellList = [];
+var buildingParameters = {};
 
 var initialGenerationSet = false;
 
 var cellColors = {
-    0: '',
-    1: '#16a085',
-    2: '#2ecc71',
-    3: '#16a085',
-    4: '#e67e22',
-    5: '#d35400',
+    0: '',          // dead
+    1: '#16a085',   // basic
+    2: '#f1c40f',   // residence
+    3: '#f39c12',   // residence-core
+    4: '#3498db',   // office
+    5: '#2980b9',   // office-core
+    6: '#e74c3c',   // commercial
+    7: '#c0392b',   // commercial-core
 };
+
+var cellIndicators = {
+    'residence': [2, 3],
+    'office': [4, 5],
+    'commercial': [6, 7],
+}
 
 var sketch = function(p) {
     let mainWindow;
@@ -78,12 +85,13 @@ var sketch = function(p) {
         inputs['plotWidth'] = document.getElementById('inputPlotWidth');
         inputs['plotLength'] = document.getElementById('inputPlotLength');
         inputs['unitSize'] = document.getElementById('inputUnitSize');
-        inputs['coreCells'] = document.getElementById('inputCoreCells');
-        inputs['deadCells'] = document.getElementById('inputDeadCells');
         inputs['floors'] = document.getElementById('inputFloors');
         inputs['wraparound'] = document.getElementById('inputWraparound');
         inputs['singleFloor'] = document.getElementById('inputSingleFloor');
         inputs['ruleset'] = document.getElementById('buttonRuleset');
+        inputs['cellTypes'] = document.getElementById('inputCellTypes');
+        inputs['coreCells'] = document.getElementById('inputCoreCells');
+        inputs['deadCells'] = document.getElementById('inputDeadCells');
 
         for (let i = 0; i < automaton.rulesets.length; i++) {
             $("#dropdownRuleset").append('<button class="dropdown-item btn-sm" value="' + i + '">' + automaton.rulesets[i] + '</button>');
@@ -98,10 +106,12 @@ var sketch = function(p) {
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
         buttons['exportLayers'] = document.getElementById('buttonExportLayers');
+        buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
         buttons['exportLayers'].onclick = exportLayers;
+        buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
 
         $('#buttonExportLayers').prop('disabled', true);
 
@@ -254,80 +264,29 @@ var sketch = function(p) {
 
     function setInitialParameters() {
         clearInterval(layerDrawTimer);
-        
-        if (inputs['coreCells'].value.length !== 0) {
-            coreCellList = inputs['coreCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
-            
-            for (var i = 0; i < coreCellList.length; i++) {
-                coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
-    
-                for (var j =0; j < coreCellList[i].length; j++) {
-                    coreCellList[i][j] = parseInt(coreCellList[i][j]);
-                }
-            }
-        }
-        else {
-            coreCellList = [];
-        }
-
-        if (inputs['deadCells'].value.length !== 0) {
-            deadCellList = inputs['deadCells'].value.replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
-            
-            for (var i = 0; i < deadCellList.length; i++) {
-                deadCellList[i] = deadCellList[i].match(/\(([^)]+)\)/)[1].split(',');
-    
-                for (var j =0; j < deadCellList[i].length; j++) {
-                    deadCellList[i][j] = parseInt(deadCellList[i][j]);
-                }
-            }
-        }
-
-        let initialGeneration = new Array(gridRows);
-        for (let i = 0; i < initialGeneration.length; i++) {
-            initialGeneration[i] = new Array(gridCols);
-        }
-
-        // office-residence
-        for (let i = 0; i < gridRows; i++) {
-            for (let j = 0; j < gridCols; j++) {
-                if (p.floor(p.random(2)) == 1) {
-                    initialGeneration[i][j] = 4;
-                }
-                else {
-                    initialGeneration[i][j] = 0;
-                }
-            }
-        }
-
-        for (let i = 0; i < coreCellList.length; i++) {
-            initialGeneration[coreCellList[i][0] - 1][coreCellList[i][1] - 1] = 5;
-        }
-
-        for (let i = 0; i < deadCellList.length; i++) {
-            initialGeneration[deadCellList[i][0] - 1][deadCellList[i][1] - 1] = -1;
-        }
+        saveBuildingParameters();
 
         $('#floorSlider').bootstrapSlider({max: 1, value: 1});
         $('#floorSlider').bootstrapSlider("disable");
         $('#buttonExportLayers').prop('disabled', true);
 
         automaton.initialise(gridRows, gridCols, false);
-        automaton.setInitialGeneration(initialGeneration);
+        automaton.setBuildingParameters(buildingParameters);
+        automaton.setInitialGeneration('random', true);
         buttons['propagate'].value = 'Propagate';
         initialGenerationSet = true;
     }
 
     function propagate() {
         if (initialGenerationSet === false) {
-            showAlert('danger', 'Set the initial generation first!');
+            showAlert('danger', 'Please set the initial generation first!');
         }
         else if ($("#buttonRuleset").text().indexOf('Select Ruleset') !== -1) {
-            showAlert('danger', 'Select the ruleset first!');
+            showAlert('danger', 'Please select the ruleset first!');
         }
         else if (buttons['propagate'].value === 'Propagate') {
             buttons['propagate'].value = 'Reset';
 
-            floors = parseInt(inputs['floors'].value);
             wraparound = inputs['wraparound'].checked;
             ruleset = $("#buttonRuleset").text();
             
@@ -351,6 +310,124 @@ var sketch = function(p) {
 
             automaton.reset();
         }
+    }
+
+    function saveBuildingParameters() {
+        let cellTypes = {};
+        let coreCells = {};
+        let deadCells = {};
+
+        floors = parseInt(inputs['floors'].value);
+        
+        if (inputs['cellTypes'].value.length !== 0) {
+            let temp = inputs['cellTypes'].value.replace(/ /g, '').split('\n');
+            
+            for (let i = 0; i < temp.length; i++) {
+                cellTypes[temp[i].split(':')[0]] = temp[i].split(':')[1];
+            }
+
+            for (var key in cellTypes) {
+                let range = key.replace(/[[\]]/g, '');
+                
+                let start = parseInt(range.split('-')[0]);
+                let end = parseInt(range.split('-')[1]);
+
+                for (let i = start; i < end; i++) {
+                    cellTypes[i] = cellIndicators[cellTypes[key]];
+                }
+
+                delete cellTypes[key];
+            }
+
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                if(!(floor in cellTypes)) {
+                    cellTypes[floor] = cellTypes[(i - 1).toString()];
+                }
+            }
+        }
+
+        if (inputs['coreCells'].value.length !== 0) {
+            let temp = inputs['coreCells'].value.replace(/ /g, '').split('\n');
+            
+            for (let i = 0; i < temp.length; i++) {
+                coreCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+            }
+
+            for (var key in coreCells) {
+                let range = key.replace(/[[\]]/g, '');
+                
+                let start = parseInt(range.split('-')[0]);
+                let end = parseInt(range.split('-')[1]);
+                
+                let coreCellList = coreCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
+                
+                for (var i = 0; i < coreCellList.length; i++) {
+                    coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
+        
+                    for (var j =0; j < coreCellList[i].length; j++) {
+                        coreCellList[i][j] = parseInt(coreCellList[i][j]);
+                    }
+                }
+                
+                for (let i = start; i < end; i++) {
+                    coreCells[i] = coreCellList;
+                }
+
+                delete coreCells[key];
+            }
+
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                if(!(floor in coreCells)) {
+                    coreCells[floor] = [];
+                }
+            }
+        }
+
+        if (inputs['deadCells'].value.length !== 0) {
+            let temp = inputs['deadCells'].value.replace(/ /g, '').split('\n');
+            
+            for (let i = 0; i < temp.length; i++) {
+                deadCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+            }
+
+            for (var key in deadCells) {
+                let range = key.replace(/[[\]]/g, '');
+                
+                let start = parseInt(range.split('-')[0]);
+                let end = parseInt(range.split('-')[1]);
+                
+                let deadCellList = deadCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
+                
+                for (var i = 0; i < deadCellList.length; i++) {
+                    deadCellList[i] = deadCellList[i].match(/\(([^)]+)\)/)[1].split(',');
+        
+                    for (var j =0; j < deadCellList[i].length; j++) {
+                        deadCellList[i][j] = parseInt(deadCellList[i][j]);
+                    }
+                }
+                
+                for (let i = start; i < end; i++) {
+                    deadCells[i] = deadCellList;
+                }
+
+                delete deadCells[key];
+            }
+
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                if(!(floor in deadCells)) {
+                    deadCells[floor] = [];
+                }
+            }
+        }
+
+        buildingParameters['cellTypes'] = cellTypes;
+        buildingParameters['coreCells'] = coreCells;
+        buildingParameters['deadCells'] = deadCells;
+
+        $('#buildingParametersModal').modal('hide');
     }
 
     function exportLayers() {

@@ -1,20 +1,23 @@
-function CellularAutomaton(rows, cols, ruleset, wraparound) {
+function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) {
     if (typeof(rows) === 'undefined') rows = 10;
     if (typeof(cols) === 'undefined') cols = 10;
     if (typeof(ruleset) === 'undefined') ruleset = 'game-of-life';
     if (typeof(wraparound) === 'undefined') wraparound = true;
+    if (typeof(buildingParameters) === 'undefined') buildingParameters = {};
 
     this.rows = rows;
     this.cols = cols;
     this.ruleset = ruleset;
     this.wraparound = wraparound;
+    this.buildingParameters = buildingParameters;
 
     this.generations = [];
 
     this.rulesets = [
         'game-of-life',
-        'simple-office-residence',
+        'crooked-game-of-life',
         'sheet-000',
+        'custom',
     ]
 
     this.make2DArray = function() {
@@ -41,19 +44,30 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
         this.ruleset = ruleset;
     }
 
+    this.setBuildingParameters = function(buildingParameters) {
+        this.buildingParameters = buildingParameters;
+    }
+
     this.reset = function() {
         this.generations = [this.generations[0]]
     }
 
-    this.setInitialGeneration = function(generation) {
+    this.setInitialGeneration = function(generation, useBuildingParameters) {
         if (typeof(generation) === 'undefined') generation = 'random';
+        if (typeof(useBuildingParameters) === 'undefined') useBuildingParameters = true;
 
         let initialGeneration = this.make2DArray();
 
         if (generation === 'random') {
             for (let row = 0; row < this.rows; row++) {
                 for (let col = 0; col < this.cols; col++) {
-                    initialGeneration[row][col] = Math.floor(Math.random(2) * 2);
+                    if (Math.floor(Math.random(2) * 2) === 0) {
+                        initialGeneration[row][col] = 0;
+                    }
+                    else {
+                        if (useBuildingParameters) initialGeneration[row][col] = this.buildingParameters['cellTypes']['0'][0];
+                        else initialGeneration[row][col] = 1;
+                    }
                 }
             }
         }
@@ -66,6 +80,18 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
         }
         else {
             return -1;
+        }
+
+        if (useBuildingParameters) {
+            let coreCells = this.buildingParameters['coreCells']['0'];
+            for (let i = 0; i < coreCells.length; i++) {
+                initialGeneration[coreCells[i][0]][coreCells[i][1]] = this.buildingParameters['cellTypes']['0'][1];
+            }
+
+            let deadCells = this.buildingParameters['deadCells']['0'];
+            for (let i = 0; i < deadCells.length; i++) {
+                initialGeneration[deadCells[i][0]][deadCells[i][1]] = 0;
+            }
         }
 
         this.generations = [];
@@ -98,20 +124,42 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
     }
 
     this.applyRules = function(ruleSet, generation, row, col) {
-        let state = generation[row][col];
-        if (state === -1) return -1;
+        let aliveIndicator = 1;
+        let coreIndicator = -1;
         
+        if (!isEmpty(this.buildingParameters)) {
+            let nextFloor = this.generations.length;
+            aliveIndicator = this.buildingParameters['cellTypes'][nextFloor][0];
+            coreIndicator = this.buildingParameters['cellTypes'][nextFloor][1];
+
+            let coreCells = this.buildingParameters['coreCells'][nextFloor];
+            for (let i = 0; i < coreCells.length; i++) {
+                if (row === coreCells[i][0] && col === coreCells[i][1]) {
+                    return coreIndicator;
+                }
+            }
+
+            let deadCells = this.buildingParameters['deadCells'][nextFloor];
+            for (let i = 0; i < deadCells.length; i++) {
+                if (row === deadCells[i][0] && col === deadCells[i][1]) {
+                    return 0;
+                }
+            }
+        }
+
+        let state = generation[row][col];
+
         switch (ruleSet) {
             case 'game-of-life': {
-                
                 let sumNeighbours = this.countNeighbours(this.getNeighbours(generation, row, col));
                 
                 if (state === 0 && sumNeighbours === 3) {
-                    return 1;
-                } else if (state > 0 && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                    return aliveIndicator;
+                } else if (state === aliveIndicator && (sumNeighbours < 2 || sumNeighbours > 3)) {
                     return 0;
                 } else {
-                    return state;
+                    if (state !== 0) return aliveIndicator;
+                    else return state;
                 }
     
                 break;
@@ -121,65 +169,19 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
                 let sumNeighbours = this.countNeighbours(this.getNeighbours(generation, row, col));
     
                 if (state === 0 && sumNeighbours === 4) {
-                    return 1;
-                } else if (state > 0 && (sumNeighbours < 3 || sumNeighbours > 4)) {
+                    return aliveIndicator;
+                } else if (state === aliveIndicator && (sumNeighbours < 3 || sumNeighbours > 4)) {
                     return 0;
                 } else {
-                    return state;
+                    if (state !== 0) return aliveIndicator;
+                    else return state;
                 }
     
-                break;
-            }
-    
-            case 'simple-office-residence': {
-                let neighbours = this.getNeighbours(generation, row, col);
-    
-                if (this.generations.length < 8) {
-                    if (state === 5) {
-                        return 5;
-                    }
-                    else {
-                        let sumNeighbours = this.countNeighbours(neighbours, [4, 5])
-                        if (state === 0 && sumNeighbours === 3) {
-                            return 4;
-                        } else if (state === 4 && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                            return 0;
-                        } else {
-                            return state;
-                        }
-                    }
-                } 
-                else {
-                    if ((neighbours[0] === '5') && (neighbours[1] === '5') && (neighbours[3] == '5') || (state === 3)) {
-                        return 3;
-                    }
-                    else {
-                        let sumNeighbours = this.countNeighbours(neighbours, [2, 3, 4, 5])
-                        if (state === 0 && sumNeighbours === 3) {
-                            return 2;
-                        } else if ((state === 2 || state === 5 || state === 4) && (sumNeighbours < 2 || sumNeighbours > 3)) {
-                            return 0;
-                        } else {
-                            if (state === 4 || state ===5) return 2;
-                            else return state;
-                        }
-                    }
-                }
-                
                 break;
             }
 
             case 'sheet-000': {
                 let neighbours = this.getNeighbours(generation, row, col);
-
-                if (this.generations.length < 8) {
-                    if (state === 5) return 5;
-                }
-                else  {
-                    if ((neighbours[0] === '5') && (neighbours[1] === '5') && (neighbours[3] == '5') || (state === 3)) {
-                        return 3;
-                    }
-                }
 
                 let born = [
                     '1278', '2367', '3456', '1458',
@@ -202,12 +204,12 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
                     '2356', '1248', '3467', '1578'];
 
                 if (state === 0 && this.isNeighbourAlive(neighbours, born))
-                    return (this.generations.length < 8) ? 4 : 2;
-                else if (state !== 0 && this.isNeighbourAlive(neighbours, dead))
+                    return aliveIndicator;
+                else if (state === aliveIndicator && this.isNeighbourAlive(neighbours, dead))
                     return 0;
                 else {
                     if (state === 0) return 0;
-                    else return (this.generations.length < 8) ? 4 : 2;
+                    else return aliveIndicator;
                 }
 
                 break;
@@ -292,4 +294,13 @@ function CellularAutomaton(rows, cols, ruleset, wraparound) {
     
         return sum;
     }
+}
+
+function isEmpty(obj) {
+    for(var prop in obj) {
+        if(obj.hasOwnProperty(prop))
+            return false;
+    }
+
+    return true;
 }
