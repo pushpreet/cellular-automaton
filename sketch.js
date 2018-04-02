@@ -5,6 +5,7 @@ var floors;
 var wraparound;
 var ruleset;
 var buildingParameters = {};
+var customRuleset = {};
 
 var initialGenerationSet = false;
 
@@ -54,6 +55,8 @@ var sketch = function(p) {
     var renderedLayerStart = 0;
     var renderedLayerEnd = 1;
 
+    var renderCellOutline = true;
+
     var easycam;
 
     let inputs = {};
@@ -92,6 +95,21 @@ var sketch = function(p) {
         inputs['cellTypes'] = document.getElementById('inputCellTypes');
         inputs['coreCells'] = document.getElementById('inputCoreCells');
         inputs['deadCells'] = document.getElementById('inputDeadCells');
+        inputs['birthConditions'] = document.getElementById('inputBirthConditions');
+        inputs['deathConditions'] = document.getElementById('inputDeathConditions');
+        inputs['cellOutline'] = document.getElementById('inputCellOutline');
+
+        buttons['setInitial'] = document.getElementById('buttonSetInitial');
+        buttons['propagate'] = document.getElementById('buttonPropagate');
+        buttons['exportLayers'] = document.getElementById('buttonExportLayers');
+        buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
+        buttons['saveCustomRuleset'] = document.getElementById('buttonSaveCustomRuleset');
+
+        buttons['setInitial'].onclick = setInitialParameters;
+        buttons['propagate'].onclick = propagate;
+        buttons['exportLayers'].onclick = exportLayers;
+        buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
+        buttons['saveCustomRuleset'].onclick = saveCustomRuleset;
 
         for (let i = 0; i < automaton.rulesets.length; i++) {
             $("#dropdownRuleset").append('<button class="dropdown-item btn-sm" value="' + i + '">' + automaton.rulesets[i] + '</button>');
@@ -101,17 +119,14 @@ var sketch = function(p) {
             e.preventDefault(); // cancel the link behaviour
             var selText = $(this).text();
             $("#buttonRuleset").text(selText);
+
+            if (selText === 'custom') {
+                $("#buttonSetCustomRuleset").prop('disabled', false);
+            }
+            else {
+                $("#buttonSetCustomRuleset").prop('disabled', true);
+            }
         });
-
-        buttons['setInitial'] = document.getElementById('buttonSetInitial');
-        buttons['propagate'] = document.getElementById('buttonPropagate');
-        buttons['exportLayers'] = document.getElementById('buttonExportLayers');
-        buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
-
-        buttons['setInitial'].onclick = setInitialParameters;
-        buttons['propagate'].onclick = propagate;
-        buttons['exportLayers'].onclick = exportLayers;
-        buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
 
         $('#buttonExportLayers').prop('disabled', true);
 
@@ -127,12 +142,13 @@ var sketch = function(p) {
         });
 
         $('#inputSingleFloor').click(function() {
-            if (this.checked) {
-                renderedLayerStart = -1;
-            }
-            else {
-                renderedLayerStart = 0;
-            }
+            if (this.checked) renderedLayerStart = -1;
+            else renderedLayerStart = 0;
+        });
+
+        $('#inputCellOutline').click(function() {
+            if (this.checked) renderCellOutline = true;
+            else renderCellOutline = false;
         });
 
         $('#cellDrawScaleSlider').bootstrapSlider({
@@ -289,6 +305,11 @@ var sketch = function(p) {
 
             wraparound = inputs['wraparound'].checked;
             ruleset = $("#buttonRuleset").text();
+
+            if (ruleset === 'custom') {
+                saveCustomRuleset();
+                automaton.setCustomRuleset(customRuleset);
+            }
             
             renderedLayerEnd = floors;
 
@@ -430,6 +451,16 @@ var sketch = function(p) {
         $('#buildingParametersModal').modal('hide');
     }
 
+    function saveCustomRuleset() {
+        let birth = inputs['birthConditions'].value.replace(/\s/g, '').split(',');
+        let death = inputs['deathConditions'].value.replace(/\s/g, '').split(',');
+
+        customRuleset['birth'] = birth;
+        customRuleset['death'] = death;
+
+        $('#customRulesetModal').modal('hide');
+    }
+
     function exportLayers() {
         var layerData = '';
 
@@ -531,8 +562,14 @@ var sketch = function(p) {
         if (layerStart === -1) layerStart = layerEnd - 1;
         if (layerStart < 0) layerStart = 0;
 
-        p.stroke('#000000');
-        p.strokeWeight(2);
+        if (renderCellOutline) {
+            p.stroke('#000000');
+            p.strokeWeight(2);
+        }
+        else {
+            p.noStroke();
+        }
+        
         p.translate(gridTopLeft.x, gridTopLeft.y, gridTopLeft.z + (scaledUnitSize * layerStart));
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {

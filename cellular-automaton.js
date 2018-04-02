@@ -11,6 +11,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
     this.wraparound = wraparound;
     this.buildingParameters = buildingParameters;
 
+    this.customRuleset = {};
     this.generations = [];
 
     this.rulesets = [
@@ -46,6 +47,10 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
 
     this.setBuildingParameters = function(buildingParameters) {
         this.buildingParameters = buildingParameters;
+    }
+
+    this.setCustomRuleset = function(customRuleset) {
+        this.customRuleset = customRuleset;
     }
 
     this.reset = function() {
@@ -155,7 +160,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                 
                 if (state === 0 && sumNeighbours === 3) {
                     return aliveIndicator;
-                } else if (state === aliveIndicator && (sumNeighbours < 2 || sumNeighbours > 3)) {
+                } else if (state !== 0 && (sumNeighbours < 2 || sumNeighbours > 3)) {
                     return 0;
                 } else {
                     if (state !== 0) return aliveIndicator;
@@ -170,7 +175,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
     
                 if (state === 0 && sumNeighbours === 4) {
                     return aliveIndicator;
-                } else if (state === aliveIndicator && (sumNeighbours < 3 || sumNeighbours > 4)) {
+                } else if (state !== 0 && (sumNeighbours < 3 || sumNeighbours > 4)) {
                     return 0;
                 } else {
                     if (state !== 0) return aliveIndicator;
@@ -183,7 +188,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
             case 'sheet-000': {
                 let neighbours = this.getNeighbours(generation, row, col);
 
-                let born = [
+                let birth = [
                     '1278', '2367', '3456', '1458',
                     '1267', '2378', '1345', '4568',
                     '124578', '234578',
@@ -195,7 +200,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                     '127', '237', '145', '456', '267', '278', '345', '458',
                     '1245', '2345', '4567', '4578', '1247', '2357', '2467', '2578'];
 
-                let dead = [
+                let death = [
                     '1368', 
                     '36', '18',
                     '1358', '1346', '1678', '3678', '1236', '3568', '1238', '1568',
@@ -203,9 +208,9 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                     '134', '468', '378', '238', '126', '568', '135', '167',
                     '2356', '1248', '3467', '1578'];
 
-                if (state === 0 && this.isNeighbourAlive(neighbours, born))
+                if (state === 0 && this.isNeighbourAlive(neighbours, birth))
                     return aliveIndicator;
-                else if (state === aliveIndicator && this.isNeighbourAlive(neighbours, dead))
+                else if (state !== 0 && this.isNeighbourAlive(neighbours, death))
                     return 0;
                 else {
                     if (state === 0) return 0;
@@ -214,7 +219,25 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
 
                 break;
             }
-        }   
+
+            case 'custom': {
+                let neighbours = this.getNeighbours(generation, row, col);
+
+                let birth = this.customRuleset['birth'];
+                let death = this.customRuleset['death'];
+
+                if (state === 0 && this.isNeighbourAlive(neighbours, birth))
+                    return aliveIndicator;
+                else if (state !== 0 && this.isNeighbourAlive(neighbours, death))
+                    return 0;
+                else {
+                    if (state === 0) return 0;
+                    else return aliveIndicator;
+                }
+
+                break;
+            }
+        }
     }
     
     this.getNeighbours = function(generation, row, col) {

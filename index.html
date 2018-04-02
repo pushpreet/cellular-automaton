@@ -84,8 +84,11 @@
 								<div class="dropdown-menu" aria-labelledby="buttonRuleset" id="dropdownRuleset">
 								</div>
 							</div>
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
+								<input id="buttonSetCustomRuleset" type="button" class="btn btn-light btn-sm" value="Set Custom Rulseset" data-toggle="modal" data-target="#customRulesetModal" style="width: 100%;" disabled/>
+							</div>
 							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-6">
-								<input class="form-check-input" type="checkbox" value="" id="inputWraparound" style="margin-left:0px;">
+								<input class="form-check-input" type="checkbox" id="inputWraparound" style="margin-left:0px;">
 								<label class="form-check-label" for="inputWraparound" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Wraparound
 								</label>
@@ -103,7 +106,13 @@
 							</div>
 
 							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
-								<input class="form-check-input" type="checkbox" value="" id="inputSingleFloor" style="margin-left:0px;">
+								<input class="form-check-input" type="checkbox" id="inputCellOutline" style="margin-left:0px;" checked>
+								<label class="form-check-label" for="inputCellOutline" style="padding-left:20px; font-family:Lato; font-size:14px">
+									Cell Outline
+								</label>
+							</div>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+								<input class="form-check-input" type="checkbox" id="inputSingleFloor" style="margin-left:0px;">
 								<label class="form-check-label" for="inputSingleFloor" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Single Floor
 								</label>
@@ -170,21 +179,50 @@
 				</div>
 				<div class="form-group">
 					<label for="inputCellTypes" class="col-form-label" style="color: black;">Cell Types</label>
-					<textarea class="form-control" id="inputCellTypes">[0-7]: office&#13;&#10;[7-14]: residence</textarea>
+					<textarea class="form-control" rows="3" id="inputCellTypes">[0-7]: office&#13;&#10;[7-14]: residence</textarea>
 				</div>
 				<div class="form-group">
-					<label for="inputCoreCells" class="col-form-label" style="color: black;" value="">Core Cells</label>
-					<textarea class="form-control" id="inputCoreCells">[0-7]: (4, 4), (4, 5), (5, 4), (5, 5)&#13;&#10;[7-14]: (5, 5)</textarea>
+					<label for="inputCoreCells" class="col-form-label" style="color: black;">Core Cells</label>
+					<textarea class="form-control" rows="3" id="inputCoreCells">[0-7]: (4, 4), (4, 5), (5, 4), (5, 5)&#13;&#10;[7-14]: (5, 5)</textarea>
 				</div>
 				<div class="form-group">
-					<label for="inputDeadCells" class="col-form-label" style="color: black;" value="">Dead Cells</label>
-					<textarea class="form-control" id="inputDeadCells">[0-7]: (0, 0), (9, 9)</textarea>
+					<label for="inputDeadCells" class="col-form-label" style="color: black;">Dead Cells</label>
+					<textarea class="form-control" rows="3" id="inputDeadCells">[0-7]: (0, 0), (9, 9)</textarea>
 				</div>
 				</form>
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
 				<button id="buttonSaveBuildingParameters" type="button" class="btn btn-primary">Save</button>
+			</div>
+			</div>
+		</div>
+	</div>
+
+	<div class="modal fade" id="customRulesetModal" tabindex="-1" role="dialog" aria-labelledby="customRulesetModal" aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content">
+			<div class="modal-header">
+				<h5 class="modal-title">Set Custom Ruleset</h5>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+				<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body">
+				<form>
+				<div class="form-group">
+					<label for="inputBirthConditions" class="col-form-label" style="color: black;">Birth Conditions</label>
+					<textarea class="form-control" rows="7" id="inputBirthConditions"></textarea>
+				</div>
+				<div class="form-group">
+					<label for="inputDeathConditions" class="col-form-label" style="color: black;">Death Conditions</label>
+					<textarea class="form-control" rows="7" id="inputDeathConditions"></textarea>
+				</div>
+				</form>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+				<button id="buttonSaveCustomRuleset" type="button" class="btn btn-primary">Save</button>
 			</div>
 			</div>
 		</div>
