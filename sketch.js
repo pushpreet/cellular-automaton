@@ -348,7 +348,7 @@ var sketch = function(p) {
             let temp = inputs['cellTypes'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
-                cellTypes[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                if (temp[i].trim() !== '') cellTypes[temp[i].split(':')[0]] = temp[i].split(':')[1];
             }
 
             for (var key in cellTypes) {
@@ -382,7 +382,7 @@ var sketch = function(p) {
             let temp = inputs['coreCells'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
-                coreCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                if (temp[i].trim() !== '') coreCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
             }
 
             for (var key in coreCells) {
@@ -426,7 +426,7 @@ var sketch = function(p) {
             let temp = inputs['deadCells'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
-                deadCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                if (temp[i].trim() !== '') deadCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
             }
 
             for (var key in deadCells) {
