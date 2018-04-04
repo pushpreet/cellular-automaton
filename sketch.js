@@ -46,7 +46,8 @@ var sketch = function(p) {
     var scaledPlotSizeY;
     var scaledUnitSize;
 
-    var cellDrawScale = 1;
+    var cellXYScale = 1;
+    var cellZScale = 1;
 
     let gridRows;
     let gridCols;
@@ -97,25 +98,28 @@ var sketch = function(p) {
         inputs['floors'] = document.getElementById('inputFloors');
         inputs['wraparound'] = document.getElementById('inputWraparound');
         inputs['singleFloor'] = document.getElementById('inputSingleFloor');
-        inputs['ruleset'] = document.getElementById('buttonRuleset');
         inputs['cellTypes'] = document.getElementById('inputCellTypes');
         inputs['coreCells'] = document.getElementById('inputCoreCells');
         inputs['deadCells'] = document.getElementById('inputDeadCells');
         inputs['birthConditions'] = document.getElementById('inputBirthConditions');
         inputs['deathConditions'] = document.getElementById('inputDeathConditions');
         inputs['cellOutline'] = document.getElementById('inputCellOutline');
+        inputs['floorFill'] = document.getElementById('inputFloorFill');
+        inputs['volumeFill'] = document.getElementById('inputVolumeFill');
 
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
         buttons['exportLayers'] = document.getElementById('buttonExportLayers');
         buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
         buttons['saveCustomRuleset'] = document.getElementById('buttonSaveCustomRuleset');
+        buttons['savePropogationParameters'] = document.getElementById('buttonSavePropogationParameters');
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
         buttons['exportLayers'].onclick = exportLayers;
         buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
         buttons['saveCustomRuleset'].onclick = saveCustomRuleset;
+        buttons['savePropogationParameters'].onclick = savePropogationParameters;
 
         for (let i = 0; i < automaton.rulesets.length; i++) {
             $("#dropdownRuleset").append('<button class="dropdown-item btn-sm" value="' + i + '">' + automaton.rulesets[i] + '</button>');
@@ -157,15 +161,26 @@ var sketch = function(p) {
             else renderCellOutline = false;
         });
 
-        $('#cellDrawScaleSlider').bootstrapSlider({
+        $('#cellXYScaleSlider').bootstrapSlider({
             formatter: function(value) {
                 return 'Current value: ' + value;
             }
         });
 
-        $('#cellDrawScaleSlider').on("slide", function(slideEvt) {
-            $("#cellDrawScaleValue").text("Cell Draw Scale: " + slideEvt.value.toPrecision(2) + 'x');
-            cellDrawScale = slideEvt.value.toPrecision(2);
+        $('#cellXYScaleSlider').on("slide", function(slideEvt) {
+            $("#cellXYScaleValue").text("Cell XY Scale: " + slideEvt.value.toPrecision(2) + 'x');
+            cellXYScale = slideEvt.value.toPrecision(2);
+        });
+
+        $('#cellZScaleSlider').bootstrapSlider({
+            formatter: function(value) {
+                return 'Current value: ' + value;
+            }
+        });
+
+        $('#cellZScaleSlider').on("slide", function(slideEvt) {
+            $("#cellZScaleValue").text("Cell Z Scale: " + slideEvt.value.toPrecision(2) + 'x');
+            cellZScale = slideEvt.value.toPrecision(2);
         });
 
         saveBuildingParameters()
@@ -530,6 +545,10 @@ var sketch = function(p) {
         }
     }
 
+    function savePropogationParameters() {
+
+    }
+
     function saveCustomRuleset() {
         let birth = inputs['birthConditions'].value.replace(/\s/g, '').split(',');
         let death = inputs['deathConditions'].value.replace(/\s/g, '').split(',');
@@ -649,19 +668,19 @@ var sketch = function(p) {
             p.noStroke();
         }
         
-        p.translate(gridTopLeft.x, gridTopLeft.y, gridTopLeft.z + (scaledUnitSize * layerStart));
+        p.translate(gridTopLeft.x, gridTopLeft.y, (gridTopLeft.z * cellZScale) + (scaledUnitSize * layerStart));
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
                     if (generations[layer][i][j] > 0) {
                         p.ambientMaterial(cellColors[generations[layer][i][j]]);
-                        p.box(scaledUnitSize * cellDrawScale, scaledUnitSize * cellDrawScale, scaledUnitSize);
+                        p.box(scaledUnitSize * cellXYScale, scaledUnitSize * cellXYScale, scaledUnitSize * cellZScale);
                     }
                     p.translate(0, scaledUnitSize, 0);
                 }
                 p.translate(scaledUnitSize, -gridCols * scaledUnitSize, 0);
             }
-            p.translate(-gridRows * scaledUnitSize, 0, scaledUnitSize);
+            p.translate(-gridRows * scaledUnitSize, 0, scaledUnitSize * cellZScale);
         }
     }
 }
