@@ -360,7 +360,6 @@ var sketch = function(p) {
             }
 
             for (var key in cellTypes) {
-                console.log(key);
                 if (!(cellTypes[key].toLowerCase() in cellIndicators)) {
                     errorInput = '#inputCellTypes';
                     errorMessage = `Incorrect cell type '${cellTypes[key]}'.`;
