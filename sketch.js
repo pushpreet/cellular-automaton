@@ -5,9 +5,12 @@ var floors;
 var wraparound;
 var ruleset;
 var buildingParameters = {};
+var propogationParameters = {};
 var customRuleset = {};
 
 var initialGenerationSet = false;
+
+let scrollLock = true;
 
 var cellColors = {
     0: '',          // dead
@@ -112,14 +115,12 @@ var sketch = function(p) {
         buttons['exportLayers'] = document.getElementById('buttonExportLayers');
         buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
         buttons['saveCustomRuleset'] = document.getElementById('buttonSaveCustomRuleset');
-        buttons['savePropogationParameters'] = document.getElementById('buttonSavePropogationParameters');
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
         buttons['exportLayers'].onclick = exportLayers;
         buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
         buttons['saveCustomRuleset'].onclick = saveCustomRuleset;
-        buttons['savePropogationParameters'].onclick = savePropogationParameters;
 
         for (let i = 0; i < automaton.rulesets.length; i++) {
             $("#dropdownRuleset").append('<button class="dropdown-item btn-sm" value="' + i + '">' + automaton.rulesets[i] + '</button>');
@@ -139,6 +140,22 @@ var sketch = function(p) {
         });
 
         $('#buttonExportLayers').prop('disabled', true);
+
+        $('#buildingParametersModal').on('hidden.bs.modal', function (e) {
+            scrollLock = true;
+        });
+
+        $('#buildingParametersModal').on('shown.bs.modal', function (e) {
+            scrollLock = false;
+        });
+
+        $("#menu").hover(
+            function() {
+                scrollLock = false;
+            },
+            function() {
+                scrollLock = true;
+         });
 
         $('#floorSlider').bootstrapSlider({
             formatter: function(value) {
@@ -229,7 +246,7 @@ var sketch = function(p) {
     }
 
     p.mouseWheel = function(event) {
-        return false;
+        return !scrollLock;
     }
 
     function drawUI() {
@@ -543,10 +560,6 @@ var sketch = function(p) {
             $(errorInput).addClass('is-invalid');
             $(errorInput + 'Feedback').text(errorMessage);
         }
-    }
-
-    function savePropogationParameters() {
-
     }
 
     function saveCustomRuleset() {
