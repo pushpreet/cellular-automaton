@@ -18,12 +18,15 @@ var cellColors = {
     5: '#2980b9',   // office-core
     6: '#e74c3c',   // commercial
     7: '#c0392b',   // commercial-core
+    8: '#9b59b6',   // cultural
+    9: '#8e44ad',   // cultural-core
 };
 
 var cellIndicators = {
     'residence': [2, 3],
     'office': [4, 5],
     'commercial': [6, 7],
+    'cultural': [8, 9],
 }
 
 var sketch = function(p) {
