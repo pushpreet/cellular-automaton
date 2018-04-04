@@ -372,14 +372,19 @@ var sketch = function(p) {
 
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputCellTypes';
-                    errorMessage = 'Please set a valid floor range.';
+                    errorMessage = 'Range out of bounds: please set a valid floor range.';
                 }
 
                 for (let i = start; i < end; i++) {
+                    if (i in cellTypes) {
+                        errorInput = '#inputCellTypes';
+                        errorMessage = 'Overlapping range: please set a valid floor range.';
+                    }
                     cellTypes[i] = cellIndicators[cellTypes[key].toLowerCase()];
                 }
 
                 delete cellTypes[key];
+                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -411,7 +416,7 @@ var sketch = function(p) {
 
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputCoreCells';
-                    errorMessage = 'Please set a valid floor range.';
+                    errorMessage = 'Range out of bounds: please set a valid floor range.';
                 }
                 
                 let coreCellList = coreCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');   
@@ -425,10 +430,15 @@ var sketch = function(p) {
                 }
                 
                 for (let i = start; i < end; i++) {
+                    if (i in coreCells) {
+                        errorInput = '#inputCoreCells';
+                        errorMessage = 'Overlapping range: please set a valid floor range.';
+                    }
                     coreCells[i] = coreCellList;
                 }
 
                 delete coreCells[key];
+                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -460,7 +470,7 @@ var sketch = function(p) {
 
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputDeadCells';
-                    errorMessage = 'Please set a valid floor range.';
+                    errorMessage = 'Range out of bounds: please set a valid floor range.';
                 }
                 
                 let deadCellList = deadCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
@@ -474,10 +484,15 @@ var sketch = function(p) {
                 }
                 
                 for (let i = start; i < end; i++) {
+                    if (i in deadCells) {
+                        errorInput = '#inputDeadCells';
+                        errorMessage = 'Overlapping range: please set a valid floor range.';
+                    }
                     deadCells[i] = deadCellList;
                 }
 
                 delete deadCells[key];
+                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -506,10 +521,12 @@ var sketch = function(p) {
             $('#buildingParametersModal').modal('hide');            
         }
         else {
+            buildingParameters = defaultBuildingParameters;
+        }
+
+        function showError() {
             $(errorInput).addClass('is-invalid');
             $(errorInput + 'Feedback').text(errorMessage);
-
-            buildingParameters = defaultBuildingParameters;
         }
     }
 
