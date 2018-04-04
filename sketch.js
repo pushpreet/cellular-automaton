@@ -345,7 +345,7 @@ var sketch = function(p) {
         floors = parseInt(inputs['floors'].value);
         
         if (inputs['cellTypes'].value.length !== 0) {
-            let temp = inputs['cellTypes'].value.replace(/ /g, '').split('\n');
+            let temp = inputs['cellTypes'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
                 cellTypes[temp[i].split(':')[0]] = temp[i].split(':')[1];
@@ -379,7 +379,7 @@ var sketch = function(p) {
         }
 
         if (inputs['coreCells'].value.length !== 0) {
-            let temp = inputs['coreCells'].value.replace(/ /g, '').split('\n');
+            let temp = inputs['coreCells'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
                 coreCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
@@ -391,7 +391,7 @@ var sketch = function(p) {
                 let start = parseInt(range.split('-')[0]);
                 let end = parseInt(range.split('-')[1]);
                 
-                let coreCellList = coreCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
+                let coreCellList = coreCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');   
                 
                 for (var i = 0; i < coreCellList.length; i++) {
                     coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
@@ -423,7 +423,7 @@ var sketch = function(p) {
         }
 
         if (inputs['deadCells'].value.length !== 0) {
-            let temp = inputs['deadCells'].value.replace(/ /g, '').split('\n');
+            let temp = inputs['deadCells'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
                 deadCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
