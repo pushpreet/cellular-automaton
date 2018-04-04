@@ -66,6 +66,8 @@ var sketch = function(p) {
     let inputs = {};
     let buttons = {};
 
+    let defaultBuildingParameters;
+
     p.setup = function() {
         p.pixelDensity(1);
 
@@ -165,6 +167,9 @@ var sketch = function(p) {
             $("#cellDrawScaleValue").text("Cell Draw Scale: " + slideEvt.value.toPrecision(2) + 'x');
             cellDrawScale = slideEvt.value.toPrecision(2);
         });
+
+        saveBuildingParameters()
+        defaultBuildingParameters = buildingParameters;
 
         mainWindowPadding = canvasSizeY/10;
         _top = 0 - canvasSizeY/2;
@@ -338,6 +343,9 @@ var sketch = function(p) {
     }
 
     function saveBuildingParameters() {
+        let errorInput = '';
+        let errorMessage;
+
         let cellTypes = {};
         let coreCells = {};
         let deadCells = {};
@@ -352,10 +360,21 @@ var sketch = function(p) {
             }
 
             for (var key in cellTypes) {
+                console.log(key);
+                if (!(cellTypes[key].toLowerCase() in cellIndicators)) {
+                    errorInput = '#inputCellTypes';
+                    errorMessage = `Incorrect cell type '${cellTypes[key]}'.`;
+                }
+
                 let range = key.replace(/[[\]]/g, '');
                 
                 let start = parseInt(range.split('-')[0]);
                 let end = parseInt(range.split('-')[1]);
+
+                if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
+                    errorInput = '#inputCellTypes';
+                    errorMessage = 'Please set a valid floor range.';
+                }
 
                 for (let i = start; i < end; i++) {
                     cellTypes[i] = cellIndicators[cellTypes[key].toLowerCase()];
@@ -390,6 +409,11 @@ var sketch = function(p) {
                 
                 let start = parseInt(range.split('-')[0]);
                 let end = parseInt(range.split('-')[1]);
+
+                if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
+                    errorInput = '#inputCoreCells';
+                    errorMessage = 'Please set a valid floor range.';
+                }
                 
                 let coreCellList = coreCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');   
                 
@@ -434,6 +458,11 @@ var sketch = function(p) {
                 
                 let start = parseInt(range.split('-')[0]);
                 let end = parseInt(range.split('-')[1]);
+
+                if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
+                    errorInput = '#inputDeadCells';
+                    errorMessage = 'Please set a valid floor range.';
+                }
                 
                 let deadCellList = deadCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
                 
@@ -466,11 +495,23 @@ var sketch = function(p) {
             }
         }
 
-        buildingParameters['cellTypes'] = cellTypes;
-        buildingParameters['coreCells'] = coreCells;
-        buildingParameters['deadCells'] = deadCells;
+        if (errorInput === '') {
+            $('#inputCellTypes').removeClass('is-invalid');
+            $('#inputCoreCells').removeClass('is-invalid');
+            $('#inputDeadCells').removeClass('is-invalid');
 
-        $('#buildingParametersModal').modal('hide');
+            buildingParameters['cellTypes'] = cellTypes;
+            buildingParameters['coreCells'] = coreCells;
+            buildingParameters['deadCells'] = deadCells;
+
+            $('#buildingParametersModal').modal('hide');            
+        }
+        else {
+            $(errorInput).addClass('is-invalid');
+            $(errorInput + 'Feedback').text(errorMessage);
+
+            buildingParameters = defaultBuildingParameters;
+        }
     }
 
     function saveCustomRuleset() {
