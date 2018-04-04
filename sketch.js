@@ -357,7 +357,7 @@ var sketch = function(p) {
                 let end = parseInt(range.split('-')[1]);
 
                 for (let i = start; i < end; i++) {
-                    cellTypes[i] = cellIndicators[cellTypes[key]];
+                    cellTypes[i] = cellIndicators[cellTypes[key].toLowerCase()];
                 }
 
                 delete cellTypes[key];
