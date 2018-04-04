@@ -21,6 +21,7 @@ var cellColors = {
 };
 
 var cellIndicators = {
+    'generic': [0, 1],
     'residence': [2, 3],
     'office': [4, 5],
     'commercial': [6, 7],
@@ -367,6 +368,12 @@ var sketch = function(p) {
                 }
             }
         }
+        else {
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                cellTypes[floor] = 'generic';
+            }
+        }
 
         if (inputs['coreCells'].value.length !== 0) {
             let temp = inputs['coreCells'].value.replace(/ /g, '').split('\n');
@@ -405,6 +412,12 @@ var sketch = function(p) {
                 }
             }
         }
+        else {
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                coreCells[floor] = [];
+            }
+        }
 
         if (inputs['deadCells'].value.length !== 0) {
             let temp = inputs['deadCells'].value.replace(/ /g, '').split('\n');
@@ -441,6 +454,12 @@ var sketch = function(p) {
                 if(!(floor in deadCells)) {
                     deadCells[floor] = [];
                 }
+            }
+        }
+        else {
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                deadCells[floor] = [];
             }
         }
 

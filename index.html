@@ -41,112 +41,112 @@
 					</div>
 
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px;">
-						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+						<div class="row padding-10">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<h6 style="color: white;">Initial Generation</h6>
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<div class="input-group-prepend">
 									<span class="input-group-text">Footprint Y</span>
 								</div>
 								<input id="inputPlotWidth" type="number" value=100 class="form-control">
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Footprint X</span>
 								</div>
 								<input id="inputPlotLength" type="number" value=100 class="form-control">
 							</div>
-							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6">
+							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<div class="input-group-prepend">
 									<span class="input-group-text" >Unit Size</span>
 								</div>
 								<input id="inputUnitSize" type="number" value=10 class="form-control">
 							</div>
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
-								<input id="buttonSetBuildingParameters" type="button" class="btn btn-light btn-sm" value="Set Building Parameters" data-toggle="modal" data-target="#buildingParametersModal" style="width: 100%;"/>
+							<div class="input-group col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
+								<input id="buttonSetBuildingParameters" type="button" class="btn btn-light btn-sm" value="Building Parameters" data-toggle="modal" data-target="#buildingParametersModal" style="width: 100%;"/>
 							</div>
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
-								<input id="buttonSetInitial" type="button" class="btn btn-success btn-sm" value="Set Initial Generation"/>
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
+								<input id="buttonSetInitial" type="button" class="btn btn-secondary btn-sm" value="Set Initial Generation"/>
 							</div>
 						</div>
 					</div>
 
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px">
-						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+						<div class="row padding-10">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<h6 style="color: white;">Propagation</h6>
 							</div>
-							<div class="dropdown col-lg-12 col-md-12 col-sm-4 col-6">
-								<button class="btn btn-light btn-sm btn-block dropdown-toggle" type="button" id="buttonRuleset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+							<div class="dropdown col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
+								<button class="btn btn-light btn-sm dropdown-toggle" type="button" id="buttonRuleset" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%;">
 									Select Ruleset
 								</button>
 								<div class="dropdown-menu" aria-labelledby="buttonRuleset" id="dropdownRuleset" style="width: 100%;">
 								</div>
 							</div>
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
-								<input id="buttonSetCustomRuleset" type="button" class="btn btn-light btn-sm" value="Set Custom Rulseset" data-toggle="modal" data-target="#customRulesetModal" style="width: 100%;" disabled/>
+							<div class="input-group col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
+								<input id="buttonSetCustomRuleset" type="button" class="btn btn-light btn-sm" value="Custom Rulseset" data-toggle="modal" data-target="#customRulesetModal" style="width: 100%;" disabled/>
 							</div>
-							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-6">
+							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<input class="form-check-input" type="checkbox" id="inputWraparound" style="margin-left:0px;">
 								<label class="form-check-label" for="inputWraparound" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Wraparound
 								</label>
 							</div>
-							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12">
-								<input id="buttonPropagate" type="button" class="btn btn-success btn-sm" value="Propagate"/>
+							<div class="input-group col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
+								<input id="buttonPropagate" type="button" class="btn btn-secondary btn-sm" value="Propagate"/>
 							</div>
 						</div>
 					</div>
 
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px">
-						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+						<div class="row padding-10">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<h6 style="color: white;">Render Controls</h6>
 							</div>
 
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<input class="form-check-input" type="checkbox" id="inputCellOutline" style="margin-left:0px;" checked>
 								<label class="form-check-label" for="inputCellOutline" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Cell Outline
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<input class="form-check-input" type="checkbox" id="inputSingleFloor" style="margin-left:0px;">
 								<label class="form-check-label" for="inputSingleFloor" style="padding-left:20px; font-family:Lato; font-size:14px">
 									Single Floor
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<label id="floorSliderValue" class="form-check-label" style="font-family:Lato; font-size:14px">
 									Floor: 1
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<input id="floorSlider" data-slider-id='sliderFloor' type="text" data-slider-min="0" data-slider-max="1" data-slider-step="1" data-slider-value="1" data-slider-enabled="false"/>
 							</div>
 
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<label id="cellDrawScaleValue" class="form-check-label" style="font-family:Lato; font-size:14px">
 									Cell Draw Scale: 1.0x
 								</label>
 							</div>
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<input id="cellDrawScaleSlider" data-slider-id='sliderCellDrawScale' type="text" data-slider-min="1" data-slider-max="4" data-slider-step="0.1" data-slider-value="1" data-slider-enabled="true"/>
 							</div>
 						</div>
 					</div>
 
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px">
-						<div class="row">
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
+						<div class="row padding-10">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
 								<h6 style="color: white;">Export</h6>
 							</div>
 							
-							<div class="col-lg-12 col-md-12 col-sm-12 col-12">
-								<div class="d-flex flex-row justify-content-end flex-wrap">
-									<div style="padding-left:6px; padding-top:3px; padding-bottom:3px;"><input id="buttonExportCAD" type="button" class="btn btn-light btn-sm" value="Export CAD" disabled/></div>
-									<div style="padding-left:6px; padding-top:3px; padding-bottom:3px;"><input id="buttonExportLayers" type="button" class="btn btn-light btn-sm" value="Export Layers"/></div>
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
+								<div class="d-flex flex-row flex-wrap justify-content-end">
+									<div class="padding-5" style="padding-top:3px; padding-bottom:3px;"><input id="buttonExportCAD" type="button" class="btn btn-light btn-sm" value="Export CAD" disabled/></div>
+									<div class="padding-5" style="padding-top:3px; padding-bottom:3px; padding-right:0px;"><input id="buttonExportLayers" type="button" class="btn btn-light btn-sm" value="Export Layers"/></div>
 								</div>
 							</div>
 						</div>
