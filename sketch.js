@@ -381,8 +381,34 @@ var sketch = function(p) {
         let cellTypes = {};
         let coreCells = {};
         let deadCells = {};
+        let floorFill = {};
+        let volumeFill = -1;
 
-        floors = parseInt(inputs['floors'].value);
+        if (inputs['floors'].value === '') {
+            errorInput = '#inputFloors';
+            errorMessage = 'Number of floors is required.';
+            floors = 14;
+        }
+        else if (parseInt(inputs['floors'].value) < 1) {
+            errorInput = '#inputFloors';
+            errorMessage = 'Floors should be greater than 1.';
+            floors = 14;
+        }
+        else {
+            floors = parseInt(inputs['floors'].value);
+        }
+
+        if (inputs['volumeFill'].value === '') {
+            volumeFill = -1;
+        }
+        else if (parseInt(inputs['volumeFill'].value) > 100 || parseInt(inputs['volumeFill'].value) < 0) {
+            errorInput = '#inputVolumeFill';
+            errorMessage = 'Allowed range is between 0 and 100.';
+            volumeFill = -1;
+        }
+        else {
+            volumeFill = parseInt(inputs['volumeFill'].value);
+        }
         
         if (inputs['cellTypes'].value.length !== 0) {
             let temp = inputs['cellTypes'].value.trim().replace(/ /g, '').split('\n');
@@ -541,6 +567,50 @@ var sketch = function(p) {
             }
         }
 
+        if (inputs['floorFill'].value.length !== 0) {
+            let temp = inputs['floorFill'].value.trim().replace(/ /g, '').split('\n');
+            
+            for (let i = 0; i < temp.length; i++) {
+                if (temp[i].trim() !== '') floorFill[temp[i].split(':')[0]] = temp[i].split(':')[1].replace(/%/, '');
+            }
+
+            for (var key in floorFill) {
+                let range = key.replace(/[[\]]/g, '');
+                
+                let start = parseInt(range.split('-')[0]);
+                let end = parseInt(range.split('-')[1]);
+
+                if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
+                    errorInput = '#inputFloorFill';
+                    errorMessage = 'Range out of bounds: please set a valid floor range.';
+                }
+
+                for (let i = start; i < end; i++) {
+                    if (i in floorFill) {
+                        errorInput = '#inputCellTypes';
+                        errorMessage = 'Overlapping range: please set a valid floor range.';
+                    }
+                    floorFill[i] = parseInt(floorFill[key]);
+                }
+
+                delete floorFill[key];
+                showError();
+            }
+
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                if(!(floor in floorFill)) {
+                    floorFill[floor] = -1;
+                }
+            }
+        }
+        else {
+            for (let i = 0; i < floors; i++) {
+                let floor = i.toString();
+                floorFill[floor] = -1;
+            }
+        }
+
         if (errorInput === '') {
             $('#inputCellTypes').removeClass('is-invalid');
             $('#inputCoreCells').removeClass('is-invalid');
@@ -549,6 +619,8 @@ var sketch = function(p) {
             buildingParameters['cellTypes'] = cellTypes;
             buildingParameters['coreCells'] = coreCells;
             buildingParameters['deadCells'] = deadCells;
+            buildingParameters['volumeFill'] = volumeFill;
+            buildingParameters['floorFill'] = floorFill;
 
             $('#buildingParametersModal').modal('hide');            
         }

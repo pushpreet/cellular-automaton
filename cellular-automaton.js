@@ -97,6 +97,11 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
             for (let i = 0; i < deadCells.length; i++) {
                 initialGeneration[deadCells[i][0]][deadCells[i][1]] = 0;
             }
+
+            let requiredFillPercentage = this.buildingParameters['floorFill']['0'];
+            if (requiredFillPercentage !== -1) {
+                this.fillFloor(initialGeneration, requiredFillPercentage, '0');
+            }
         }
 
         this.generations = [];
@@ -111,6 +116,15 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
         for (let row = 0; row < this.rows; row++) {
             for (let col = 0; col < this.cols; col++) {
                 nextGeneration[row][col] = this.applyRules(this.ruleset, lastGeneration, row, col);
+            }
+        }
+
+        if (!isEmpty(this.buildingParameters)) {
+            let nextFloor = this.generations.length;
+            let requiredFillPercentage = this.buildingParameters['floorFill'][nextFloor];
+
+            if (requiredFillPercentage !== -1) {
+                this.fillFloor(nextGeneration, requiredFillPercentage, nextFloor);
             }
         }
         
@@ -236,6 +250,56 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                 }
 
                 break;
+            }
+        }
+    }
+
+    this.fillFloor = function(generation, requiredFillPercentage, nextFloor) {
+        let fillPercent = 0;
+        let totalCells = this.rows * this.cols;
+
+        for (let row = 0; row < this.rows; row++) {
+            for (let col = 0; col < this.cols; col++) {
+                if (generation[row][col] !== 0) {
+                    fillPercent += 1;
+                }
+            }
+        }
+
+        fillPercent /= totalCells;
+        fillPercent *= 100;
+
+        if (fillPercent < requiredFillPercentage) {
+            let requiredExtraCells = Math.ceil((requiredFillPercentage - fillPercent) * totalCells / 100);
+            let deadCells = this.buildingParameters['deadCells'][nextFloor];
+
+            if ((totalCells - (fillPercent * totalCells / 100) - deadCells.length) < requiredExtraCells) {
+                requiredExtraCells = totalCells - (fillPercent * totalCells / 100) - deadCells.length;
+            }
+            
+            while (true) {
+                for (let row = 0; row < this.rows; row++) {
+                    for (let col = 0; col < this.cols; col++) {
+                        if (generation[row][col] === 0) {
+                            let dead = false;
+                            for (let k = 0; k < deadCells.length; k++) {
+                                if (row === deadCells[k][0] && col === deadCells[k][1]) {
+                                    dead = true;
+                                }
+                            }
+                            if (!dead) {
+                                if (Math.floor(Math.random(2) * 2) === 1) {
+                                    generation[row][col] = this.buildingParameters['cellTypes'][nextFloor][0];
+                                    requiredExtraCells -= 1;
+
+                                    if (requiredExtraCells === 0) break;
+                                }
+                            }
+                        }
+                    }
+                    if (requiredExtraCells === 0) break;
+                }
+                if (requiredExtraCells === 0) break;
             }
         }
     }
