@@ -70,7 +70,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                         initialGeneration[row][col] = 0;
                     }
                     else {
-                        if (useBuildingParameters) initialGeneration[row][col] = this.buildingParameters['cellTypes']['0'][0];
+                        if (useBuildingParameters) initialGeneration[row][col] = this.buildingParameters['cellTypes'][0][0];
                         else initialGeneration[row][col] = 1;
                     }
                 }
@@ -90,7 +90,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
         if (useBuildingParameters) {
             let coreCells = this.buildingParameters['coreCells']['0'];
             for (let i = 0; i < coreCells.length; i++) {
-                initialGeneration[coreCells[i][0]][coreCells[i][1]] = this.buildingParameters['cellTypes']['0'][1];
+                initialGeneration[coreCells[i][0]][coreCells[i][1]] = this.buildingParameters['cellTypes'][0][1];
             }
 
             let deadCells = this.buildingParameters['deadCells']['0'];
@@ -98,9 +98,9 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                 initialGeneration[deadCells[i][0]][deadCells[i][1]] = 0;
             }
 
-            let requiredFillPercentage = this.buildingParameters['floorFill']['0'];
+            let requiredFillPercentage = this.buildingParameters['floorFill'][0];
             if (requiredFillPercentage !== -1) {
-                this.fillFloor(initialGeneration, requiredFillPercentage, '0');
+                this.fillFloor(initialGeneration, requiredFillPercentage, 0);
             }
         }
 

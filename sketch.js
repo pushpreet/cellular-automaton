@@ -71,6 +71,9 @@ var sketch = function(p) {
     let buttons = {};
 
     let defaultBuildingParameters;
+    let invertedPropogation = false;
+
+    let _generations;
 
     p.setup = function() {
         p.pixelDensity(1);
@@ -108,7 +111,7 @@ var sketch = function(p) {
         inputs['deathConditions'] = document.getElementById('inputDeathConditions');
         inputs['cellOutline'] = document.getElementById('inputCellOutline');
         inputs['floorFill'] = document.getElementById('inputFloorFill');
-        inputs['volumeFill'] = document.getElementById('inputVolumeFill');
+        inputs['invertedPropogation'] = document.getElementById('inputInvertedPropogation');
 
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
@@ -166,6 +169,11 @@ var sketch = function(p) {
         $('#floorSlider').on("slide", function(slideEvt) {
             $("#floorSliderValue").text("Floor: " + slideEvt.value);
             renderedLayerEnd = slideEvt.value;
+        });
+
+        $('#inputInvertedPropogation').click(function() {
+            if (this.checked) invertedPropogation = true;
+            else invertedPropogation = false;
         });
 
         $('#inputSingleFloor').click(function() {
@@ -320,18 +328,39 @@ var sketch = function(p) {
     }
 
     function setInitialParameters() {
-        clearInterval(layerDrawTimer);
-        saveBuildingParameters();
+        if (buttons['setInitial'].value === 'Set Initial Parameters') {
+            buttons['setInitial'].value = 'Change Initial Parameters';
+            clearInterval(layerDrawTimer);
+            saveBuildingParameters();
 
-        $('#floorSlider').bootstrapSlider({max: 1, value: 1});
-        $('#floorSlider').bootstrapSlider("disable");
-        $('#buttonExportLayers').prop('disabled', true);
+            automaton.initialise(gridRows, gridCols, false);
+            automaton.setBuildingParameters(buildingParameters);
+            automaton.setInitialGeneration('random', true);
+            buttons['propagate'].value = 'Propagate';
+            initialGenerationSet = true;
 
-        automaton.initialise(gridRows, gridCols, false);
-        automaton.setBuildingParameters(buildingParameters);
-        automaton.setInitialGeneration('random', true);
-        buttons['propagate'].value = 'Propagate';
-        initialGenerationSet = true;
+            $('#floorSlider').bootstrapSlider({max: 1, value: 1});
+            $('#floorSlider').bootstrapSlider("disable");
+            $('#buttonExportLayers').prop('disabled', true);
+            $('#inputPlotWidth').prop('disabled', true);
+            $('#inputPlotLength').prop('disabled', true);
+            $('#inputUnitSize').prop('disabled', true);
+            $('#buttonSetBuildingParameters').prop('disabled', true);
+            $('#inputInvertedPropogation').prop('disabled', true);
+        }
+        else if (buttons['setInitial'].value === 'Change Initial Parameters') {
+            buttons['setInitial'].value = 'Set Initial Parameters';
+
+            $('#inputPlotWidth').prop('disabled', false);
+            $('#inputPlotLength').prop('disabled', false);
+            $('#inputUnitSize').prop('disabled', false);
+            $('#buttonSetBuildingParameters').prop('disabled', false);
+            $('#inputInvertedPropogation').prop('disabled', false);
+
+            automaton.generations = [];
+            initialGenerationSet = false;
+        }
+        
     }
 
     function propagate() {
@@ -358,6 +387,10 @@ var sketch = function(p) {
             $('#floorSlider').bootstrapSlider({max: floors, value: floors});
             $('#floorSlider').bootstrapSlider("enable");
             $('#buttonExportLayers').prop('disabled', false);
+            $('#buttonRuleset').prop('disabled', true);
+            $('#inputWraparound').prop('disabled', true);
+            $('#buttonSetCustomRuleset').prop('disabled', true);
+            $('#buttonSetInitial').prop('disabled', true);
 
             automaton.setWraparound(wraparound);
             automaton.setRuleset(ruleset);
@@ -369,8 +402,15 @@ var sketch = function(p) {
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
             $('#buttonExportLayers').prop('disabled', true);
+            $('#buttonRuleset').prop('disabled', false);
+            $('#inputWraparound').prop('disabled', false);
+            if ($('#buttonRuleset').text() === 'custom') {
+                $("#buttonSetCustomRuleset").prop('disabled', false);
+            }
+            $('#buttonSetInitial').prop('disabled', false);
 
             automaton.reset();
+            clearInterval(layerDrawTimer);
         }
     }
 
@@ -382,7 +422,6 @@ var sketch = function(p) {
         let coreCells = {};
         let deadCells = {};
         let floorFill = {};
-        let volumeFill = -1;
 
         if (inputs['floors'].value === '') {
             errorInput = '#inputFloors';
@@ -396,18 +435,6 @@ var sketch = function(p) {
         }
         else {
             floors = parseInt(inputs['floors'].value);
-        }
-
-        if (inputs['volumeFill'].value === '') {
-            volumeFill = -1;
-        }
-        else if (parseInt(inputs['volumeFill'].value) > 100 || parseInt(inputs['volumeFill'].value) < 0) {
-            errorInput = '#inputVolumeFill';
-            errorMessage = 'Allowed range is between 0 and 100.';
-            volumeFill = -1;
-        }
-        else {
-            volumeFill = parseInt(inputs['volumeFill'].value);
         }
         
         if (inputs['cellTypes'].value.length !== 0) {
@@ -619,13 +646,36 @@ var sketch = function(p) {
             buildingParameters['cellTypes'] = cellTypes;
             buildingParameters['coreCells'] = coreCells;
             buildingParameters['deadCells'] = deadCells;
-            buildingParameters['volumeFill'] = volumeFill;
             buildingParameters['floorFill'] = floorFill;
 
             $('#buildingParametersModal').modal('hide');            
         }
         else {
             buildingParameters = defaultBuildingParameters;
+        }
+
+        if (invertedPropogation) {
+            for (var i = 0; i < floors/2; i++) {
+                let floor = i;
+                let inverseFloor = floors-i-1;
+                let temp;
+
+                temp = buildingParameters['cellTypes'][floor];
+                buildingParameters['cellTypes'][floor] = buildingParameters['cellTypes'][inverseFloor];
+                buildingParameters['cellTypes'][inverseFloor] = temp;
+
+                temp = buildingParameters['coreCells'][floor];
+                buildingParameters['coreCells'][floor] = buildingParameters['coreCells'][inverseFloor];
+                buildingParameters['coreCells'][inverseFloor] = temp;
+
+                temp = buildingParameters['deadCells'][floor];
+                buildingParameters['deadCells'][floor] = buildingParameters['deadCells'][inverseFloor];
+                buildingParameters['deadCells'][inverseFloor] = temp;
+
+                temp = buildingParameters['floorFill'][floor];
+                buildingParameters['floorFill'][floor] = buildingParameters['floorFill'][inverseFloor];
+                buildingParameters['floorFill'][inverseFloor] = temp;
+            }
         }
 
         function showError() {
@@ -745,6 +795,17 @@ var sketch = function(p) {
         if (layerStart === -1) layerStart = layerEnd - 1;
         if (layerStart < 0) layerStart = 0;
 
+        var _generations;
+        if (invertedPropogation) {
+            _generations = (generations).reduceRight(function(previous, current) {
+                previous.push(current);
+                return previous;
+            }, []);
+        }
+        else {
+            _generations = generations;
+        }
+
         if (renderCellOutline) {
             p.stroke('#000000');
             p.strokeWeight(2);
@@ -757,8 +818,8 @@ var sketch = function(p) {
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
-                    if (generations[layer][i][j] > 0) {
-                        p.ambientMaterial(cellColors[generations[layer][i][j]]);
+                    if (_generations[layer][i][j] > 0) {
+                        p.ambientMaterial(cellColors[_generations[layer][i][j]]);
                         p.box(scaledUnitSize * cellXYScale, scaledUnitSize * cellXYScale, scaledUnitSize * cellZScale);
                     }
                     p.translate(0, scaledUnitSize, 0);
