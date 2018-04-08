@@ -128,12 +128,14 @@ var sketch = function(p) {
         buttons['exportLayers'] = document.getElementById('buttonExportLayers');
         buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
         buttons['saveCustomRuleset'] = document.getElementById('buttonSaveCustomRuleset');
+        buttons['setGrid'] = document.getElementById('buttonSetGrid');
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
         buttons['exportLayers'].onclick = exportLayers;
         buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
         buttons['saveCustomRuleset'].onclick = saveCustomRuleset;
+        buttons['setGrid'].onclick = setGrid;
 
         for (let i = 0; i < automaton.rulesets.length; i++) {
             $("#dropdownRuleset").append('<button class="dropdown-item btn-sm" value="' + i + '">' + automaton.rulesets[i] + '</button>');
@@ -345,14 +347,31 @@ var sketch = function(p) {
         gridCols = plotSizeY / unitSize;
     }
 
-    function setInitialParameters() {
-        if (automaton.generations.length === 0) {
-            automaton.initialise(gridRows, gridCols, false);
-        }
-        else {
-            automaton.generations = [automaton.generations[0]];
-        }
+    function setGrid() {
+        automaton.initialise(gridRows, gridCols, false);
+        
+        if (buttons['setGrid'].value === 'Set Grid') {
+            buttons['setGrid'].value = 'Reset Grid';
 
+            $('#inputPlotWidth').prop('disabled', true);
+            $('#inputPlotLength').prop('disabled', true);
+            $('#inputUnitSize').prop('disabled', true);
+
+            $('#buttonSetInitial').prop('disabled', false);
+        }
+        else if (buttons['setGrid'].value === 'Reset Grid') {
+            buttons['setGrid'].value = 'Set Grid';
+
+            $('#inputPlotWidth').prop('disabled', false);
+            $('#inputPlotLength').prop('disabled', false);
+            $('#inputUnitSize').prop('disabled', false);
+
+            $('#buttonSetInitial').prop('disabled', true);
+            $('#buttonPropagate').prop('disabled', true);
+        }
+    }
+
+    function setInitialParameters() {
         if (buttons['setInitial'].value === 'Set Initial Parameters') {
             buttons['setInitial'].value = 'Change Initial Parameters';
             buttons['propagate'].value = 'Propagate';
@@ -362,18 +381,24 @@ var sketch = function(p) {
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
             $('#buttonExportLayers').prop('disabled', true);
-            $('#inputPlotWidth').prop('disabled', true);
-            $('#inputPlotLength').prop('disabled', true);
-            $('#inputUnitSize').prop('disabled', true);
             $('#buttonSetBuildingParameters').prop('disabled', true);
             $('#inputInvertedPropogation').prop('disabled', true);
             $('#buttonInitialGeneration').prop('disabled', true);
 
             automaton.setBuildingParameters(buildingParameters);
             
-            if ($('#buttonInitialGeneration').text() === 'random') {
+            if ($('#buttonInitialGeneration').text().indexOf('Initial Generation') !== -1) {
+                $("#buttonInitialGeneration").text('random');
                 automaton.setInitialGeneration('random', true);
                 initialGenerationSet = true;
+
+                $('#buttonPropagate').prop('disabled', false);
+            }
+            else if ($('#buttonInitialGeneration').text() === 'random') {
+                automaton.setInitialGeneration('random', true);
+                initialGenerationSet = true;
+
+                $('#buttonPropagate').prop('disabled', false);
             }
             else if ($('#buttonInitialGeneration').text() === 'manual') {
                 buttons['setInitial'].value = 'Set';
@@ -383,12 +408,10 @@ var sketch = function(p) {
         else if (buttons['setInitial'].value === 'Change Initial Parameters') {
             buttons['setInitial'].value = 'Set Initial Parameters';
 
-            $('#inputPlotWidth').prop('disabled', false);
-            $('#inputPlotLength').prop('disabled', false);
-            $('#inputUnitSize').prop('disabled', false);
             $('#buttonSetBuildingParameters').prop('disabled', false);
             $('#inputInvertedPropogation').prop('disabled', false);
             $('#buttonInitialGeneration').prop('disabled', false);
+            $('#buttonPropagate').prop('disabled', true);
 
             automaton.generations = [automaton.generations[0]];
             initialGenerationSet = false;
@@ -400,19 +423,19 @@ var sketch = function(p) {
             saveBuildingParameters();
             automaton.setBuildingParameters(buildingParameters);
 
+            $('#buttonPropagate').prop('disabled', false);
+
             initialGenerationSet = true;
         }
     }
 
     function propagate() {
-        if (initialGenerationSet === false) {
-            showAlert('danger', 'Please set the initial generation first!');
-        }
-        else if ($("#buttonRuleset").text().indexOf('Select Ruleset') !== -1) {
-            showAlert('danger', 'Please select the ruleset first!');
-        }
-        else if (buttons['propagate'].value === 'Propagate') {
+        if (buttons['propagate'].value === 'Propagate') {
             buttons['propagate'].value = 'Reset';
+
+            if ($("#buttonRuleset").text().indexOf('Select Ruleset') !== -1) {
+                $("#buttonRuleset").text('sheet-000');
+            }
 
             wraparound = inputs['wraparound'].checked;
             ruleset = $("#buttonRuleset").text();
