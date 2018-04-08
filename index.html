@@ -43,7 +43,7 @@
 					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px;">
 						<div class="row padding-10">
 							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
-								<h6 style="color: white;">Initial Generation</h6>
+								<h6 style="color: white;">Grid Size</h6>
 							</div>
 							<div class="input-group input-group-sm col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<div class="input-group-prepend">
@@ -63,8 +63,23 @@
 								</div>
 								<input id="inputUnitSize" type="number" value=10 class="form-control">
 							</div>
+						</div>
+					</div>
+
+					<div class="col-lg-12 col-md-12 col-sm-12 col-12" style="padding-bottom:15px;">
+						<div class="row padding-10">
+							<div class="col-lg-12 col-md-12 col-sm-12 col-12 padding-5">
+								<h6 style="color: white;">Initial Parameters</h6>
+							</div>
 							<div class="input-group col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
 								<input id="buttonSetBuildingParameters" type="button" class="btn btn-light btn-sm" value="Building Parameters" data-toggle="modal" data-target="#buildingParametersModal" style="width: 100%;"/>
+							</div>
+							<div class="dropdown col-lg-12 col-md-12 col-sm-4 col-6 padding-5">
+								<button class="btn btn-light btn-sm dropdown-toggle" type="button" id="buttonInitialGeneration" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" style="width: 100%;">
+									Initial Generation
+								</button>
+								<div class="dropdown-menu" aria-labelledby="buttonInitialGeneration" id="dropdownInitialGeneration" style="width: 100%;">
+								</div>
 							</div>
 							<div class="form-check col-lg-12 col-md-12 col-sm-4 col-6 padding-5" style="padding-bottom: 0; padding-top:0;">
 								<input class="form-check-input" type="checkbox" id="inputInvertedPropogation" style="margin-left:0px;">

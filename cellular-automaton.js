@@ -57,6 +57,42 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
         this.generations = [this.generations[0]]
     }
 
+    this.toggleCell = function(floor, x, y) {
+        if (typeof this.generations[floor] === 'undefined') {
+            return -1;
+        }
+        else {
+            if (!(x < 0 || x >= this.rows || y < 0 || y >= this.cols)) {
+                if (this.generations[floor][x][y] !== 0) {
+                    this.generations[floor][x][y] = 0;
+                }
+                else {   
+                    this.generations[floor][x][y] = this.buildingParameters['cellTypes'][floor][0];
+
+                    let coreCells = this.buildingParameters['coreCells'][floor];
+                    for (let i = 0; i < coreCells.length; i++) {
+                        if (x === coreCells[i][0] && y === coreCells[i][1]) {
+                            this.generations[floor][x][y] = this.buildingParameters['cellTypes'][floor][1];
+                            return 0;
+                        }
+                    }
+
+                    let deadCells = this.buildingParameters['deadCells'][floor];
+                    for (let i = 0; i < deadCells.length; i++) {
+                        if (x === deadCells[i][0] && y === deadCells[i][1]) {
+                            this.generations[floor][x][y] = 0;
+                            return -2;
+                        }
+                    }
+                    return 0;
+                }
+            }
+            else {
+                return -1;
+            }
+        }
+    }
+
     this.setInitialGeneration = function(generation, useBuildingParameters) {
         if (typeof(generation) === 'undefined') generation = 'random';
         if (typeof(useBuildingParameters) === 'undefined') useBuildingParameters = true;
@@ -73,6 +109,13 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
                         if (useBuildingParameters) initialGeneration[row][col] = this.buildingParameters['cellTypes'][0][0];
                         else initialGeneration[row][col] = 1;
                     }
+                }
+            }
+        }
+        else if (generation === 'empty') {
+            for (let row = 0; row < this.rows; row++) {
+                for (let col = 0; col < this.cols; col++) {
+                    initialGeneration[row][col] = 0;
                 }
             }
         }

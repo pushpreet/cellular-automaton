@@ -54,6 +54,7 @@ var sketch = function(p) {
 
     let gridRows;
     let gridCols;
+    var canvas;
 
     let renderType = '3D';
     let layerDrawTimer;
@@ -75,6 +76,16 @@ var sketch = function(p) {
 
     let _generations;
 
+    let verticalLines = [];
+    let horizontalLines = [];
+
+    let initialGenerationChoices = [
+        'random',
+        'manual',
+    ]
+
+    let manualInitialGeneration;
+
     p.setup = function() {
         p.pixelDensity(1);
 
@@ -82,7 +93,7 @@ var sketch = function(p) {
         canvasSizeX = mainWindow.clientWidth-3;
         canvasSizeY = mainWindow.clientHeight-3;
 
-        let canvas = p.createCanvas(canvasSizeX, canvasSizeY, p.WEBGL);
+        canvas = p.createCanvas(canvasSizeX, canvasSizeY, p.WEBGL);
         p.setAttributes('antialiasing', true);
 
         easycam = p.createEasyCam(
@@ -94,7 +105,6 @@ var sketch = function(p) {
             }
         );
 
-        //easycam.removeMouseListeners();
         easycam.setDistanceMin(500);
         easycam.setDistanceMax(2500);
 
@@ -140,6 +150,16 @@ var sketch = function(p) {
             else {
                 $("#buttonSetCustomRuleset").prop('disabled', true);
             }
+        });
+
+        for (let i = 0; i < initialGenerationChoices.length; i++) {
+            $("#dropdownInitialGeneration").append('<button class="dropdown-item btn-sm" value="' + i + '">' + initialGenerationChoices[i] + '</button>');
+        }
+
+        $("#dropdownInitialGeneration button").click( function(e) {
+            e.preventDefault(); // cancel the link behaviour
+            var selText = $(this).text();
+            $("#buttonInitialGeneration").text(selText);
         });
 
         $('#buttonExportLayers').prop('disabled', true);
@@ -249,8 +269,6 @@ var sketch = function(p) {
 
         if (automaton.generations.length > 0) drawLayers(automaton.generations, renderedLayerStart, renderedLayerEnd);
         if (automaton.generations.length === floors) clearInterval(layerDrawTimer);
-
-        //console.log(easycam.getRotation());
     }
 
     p.mouseWheel = function(event) {
@@ -328,16 +346,18 @@ var sketch = function(p) {
     }
 
     function setInitialParameters() {
+        if (automaton.generations.length === 0) {
+            automaton.initialise(gridRows, gridCols, false);
+        }
+        else {
+            automaton.generations = [automaton.generations[0]];
+        }
+
         if (buttons['setInitial'].value === 'Set Initial Parameters') {
             buttons['setInitial'].value = 'Change Initial Parameters';
+            buttons['propagate'].value = 'Propagate';
             clearInterval(layerDrawTimer);
             saveBuildingParameters();
-
-            automaton.initialise(gridRows, gridCols, false);
-            automaton.setBuildingParameters(buildingParameters);
-            automaton.setInitialGeneration('random', true);
-            buttons['propagate'].value = 'Propagate';
-            initialGenerationSet = true;
 
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
@@ -347,6 +367,18 @@ var sketch = function(p) {
             $('#inputUnitSize').prop('disabled', true);
             $('#buttonSetBuildingParameters').prop('disabled', true);
             $('#inputInvertedPropogation').prop('disabled', true);
+            $('#buttonInitialGeneration').prop('disabled', true);
+
+            automaton.setBuildingParameters(buildingParameters);
+            
+            if ($('#buttonInitialGeneration').text() === 'random') {
+                automaton.setInitialGeneration('random', true);
+                initialGenerationSet = true;
+            }
+            else if ($('#buttonInitialGeneration').text() === 'manual') {
+                buttons['setInitial'].value = 'Set';
+                setManualInput();
+            }
         }
         else if (buttons['setInitial'].value === 'Change Initial Parameters') {
             buttons['setInitial'].value = 'Set Initial Parameters';
@@ -356,11 +388,20 @@ var sketch = function(p) {
             $('#inputUnitSize').prop('disabled', false);
             $('#buttonSetBuildingParameters').prop('disabled', false);
             $('#inputInvertedPropogation').prop('disabled', false);
+            $('#buttonInitialGeneration').prop('disabled', false);
 
-            automaton.generations = [];
+            automaton.generations = [automaton.generations[0]];
             initialGenerationSet = false;
         }
-        
+        else if (buttons['setInitial'].value === 'Set') {
+            buttons['setInitial'].value = 'Change Initial Parameters';
+            unsetManualInput();
+
+            saveBuildingParameters();
+            automaton.setBuildingParameters(buildingParameters);
+
+            initialGenerationSet = true;
+        }
     }
 
     function propagate() {
@@ -411,6 +452,55 @@ var sketch = function(p) {
 
             automaton.reset();
             clearInterval(layerDrawTimer);
+        }
+    }
+
+    function setManualInput() {
+        easycam.setDistance(p.height * 0.87, 700);
+        easycam.setRotation([1, 0, 0, 0], 700);
+        easycam.setCenter([0, 0, 0], 700);
+        easycam.removeMouseListeners();
+        setTimeout(function () {p.ortho()}, 700);
+
+        if (automaton.generations.length === 0) {
+            automaton.setInitialGeneration('empty');
+        }
+
+        p.mouseClicked = setClickedCell;
+    }
+
+    function unsetManualInput() {
+        easycam.setDistance(1200, 700);
+        easycam.setRotation([0.373774147330301, 0.2267155863804119, 0.4680836446901702, -0.7679782752482324], 700);
+        easycam.setCenter([0, 0, 350], 700);
+        easycam.attachMouseListeners();
+        p.perspective();
+
+        p.mouseClicked = function() {}
+    }
+
+    function setClickedCell() {
+        let cellX = -1;
+        let cellY = -1;
+
+        for (let i = 0; i < gridRows; i++) {
+            if (p.mouseX > verticalLines[i] && p.mouseX < verticalLines[i+1]) {
+                cellX = i;
+                break;
+            }
+        }
+
+        for (let i = 0; i < gridCols; i++) {
+            if (p.mouseY > horizontalLines[i] && p.mouseY < horizontalLines[i+1]) {
+                cellY = i;
+                break;
+            }
+        }
+
+        if (cellX !== -1 && cellY !== -1) {
+            if (automaton.toggleCell(0, cellX, cellY) === -2) {
+                showAlert('danger', 'That cell is set as a dead cell.')
+            }
         }
     }
 
@@ -774,6 +864,8 @@ var sketch = function(p) {
             else p.stroke('#7f8c8d');
             p.line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
                     (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
+            
+            verticalLines[i] = (_left + _right)/2 - scaledPlotSizeX/2 + x + p.width/2;
         }
 
         for (let j = 0; j < gridCols + 1; j++) {
@@ -784,6 +876,8 @@ var sketch = function(p) {
 
             p.line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
                     (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
+
+            horizontalLines[j] = (_top + _bottom)/2 - scaledPlotSizeY/2 + y + p.height/2;
         }
     }
 
