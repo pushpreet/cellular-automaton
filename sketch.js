@@ -126,6 +126,7 @@ var sketch = function(p) {
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
         buttons['exportLayers'] = document.getElementById('buttonExportLayers');
+        buttons['exportCAD'] = document.getElementById('buttonExportCAD');
         buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
         buttons['saveCustomRuleset'] = document.getElementById('buttonSaveCustomRuleset');
         buttons['setGrid'] = document.getElementById('buttonSetGrid');
@@ -133,6 +134,7 @@ var sketch = function(p) {
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
         buttons['exportLayers'].onclick = exportLayers;
+        buttons['exportCAD'].onclick = exportCAD;
         buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
         buttons['saveCustomRuleset'].onclick = saveCustomRuleset;
         buttons['setGrid'].onclick = setGrid;
@@ -381,6 +383,7 @@ var sketch = function(p) {
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
             $('#buttonExportLayers').prop('disabled', true);
+            $('#buttonExportCAD').prop('disabled', true);
             $('#buttonSetBuildingParameters').prop('disabled', true);
             $('#inputInvertedPropogation').prop('disabled', true);
             $('#buttonInitialGeneration').prop('disabled', true);
@@ -451,6 +454,7 @@ var sketch = function(p) {
             $('#floorSlider').bootstrapSlider({max: floors, value: floors});
             $('#floorSlider').bootstrapSlider("enable");
             $('#buttonExportLayers').prop('disabled', false);
+            $('#buttonExportCAD').prop('disabled', false);
             $('#buttonRuleset').prop('disabled', true);
             $('#inputWraparound').prop('disabled', true);
             $('#buttonSetCustomRuleset').prop('disabled', true);
@@ -842,6 +846,43 @@ var sketch = function(p) {
         var pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(layerData));
         pom.setAttribute('download', ruleset + '-' + getFormattedDate() + '.txt');
+
+        if (document.createEvent) {
+            var event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            pom.dispatchEvent(event);
+        }
+        else {
+            pom.click();
+        }
+    }
+
+    function exportCAD() {
+        var scadData = '';
+        scadData += '// SCAD file generated from Cellular Automata simulator.\n';
+        scadData += '// Author: Pushpreet Singh Hanspal.\n';
+        scadData += '// Code: https://github.com/pushpreet/cellular-automaton/\n';
+        scadData += '// Demo: https://pushpreet.github.io/cellular-automaton/\n';
+        scadData += '\n';
+        scadData += '';
+
+        scadData += `translate([${(unitSize * cellXYScale)/2}, ${(unitSize * cellXYScale)/2}, ${(unitSize * cellZScale)/2}]) {\n`;
+        scadData += `\tscale([${unitSize * cellXYScale}, ${unitSize * cellXYScale}, ${unitSize * cellZScale}]) {\n`;
+        for (let layer = 0; layer < automaton.generations.length; layer++) {
+            for (let row=0; row < automaton.generations[0].length; row++) {
+                for (let col=0; col < automaton.generations[0][0].length; col++) {
+                    if (automaton.generations[layer][row][col] !== 0) {
+                        scadData += `\t\ttranslate([${col}, ${row}, ${layer}]) { cube(1, true); }\n`;
+                    }
+                }
+            }
+        }
+        scadData += '\t}\n';
+        scadData += '}\n';
+
+        var pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(scadData));
+        pom.setAttribute('download', ruleset + '-' + getFormattedDate() + '.scad');
 
         if (document.createEvent) {
             var event = document.createEvent('MouseEvents');
