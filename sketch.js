@@ -232,7 +232,7 @@ var sketch = function(p) {
             cellZScale = slideEvt.value.toPrecision(2);
         });
 
-        saveBuildingParameters()
+        saveBuildingParameters();
         defaultBuildingParameters = buildingParameters;
 
         mainWindowPadding = canvasSizeY/10;
@@ -281,7 +281,7 @@ var sketch = function(p) {
 
     function drawUI() {
         // set background color
-        p.background('#34495e');
+        p.background('#F5F5F5');
     }
 
     function setLights() {
@@ -375,10 +375,13 @@ var sketch = function(p) {
 
     function setInitialParameters() {
         if (buttons['setInitial'].value === 'Set Initial Parameters') {
+            if (saveBuildingParameters() === -1) {
+                showAlert('danger', 'Please fix the building parameters.')
+                return false;
+            }
             buttons['setInitial'].value = 'Change Initial Parameters';
             buttons['propagate'].value = 'Propagate';
             clearInterval(layerDrawTimer);
-            saveBuildingParameters();
 
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
@@ -558,35 +561,53 @@ var sketch = function(p) {
             let temp = inputs['cellTypes'].value.trim().replace(/ /g, '').split('\n');
             
             for (let i = 0; i < temp.length; i++) {
-                if (temp[i].trim() !== '') cellTypes[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                if (temp[i].trim() !== '') {
+                    if (temp[i][0] !== '[') {
+                        errorInput = '#inputCellTypes';
+                        errorMessage = 'Rule needs to start with a floor range.';
+                        break;
+                    }
+                    cellTypes[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                }
             }
 
             for (var key in cellTypes) {
                 if (!(cellTypes[key].toLowerCase() in cellIndicators)) {
                     errorInput = '#inputCellTypes';
                     errorMessage = `Incorrect cell type '${cellTypes[key]}'.`;
+                    break;
                 }
 
                 let range = key.replace(/[[\]]/g, '');
-                
-                let start = parseInt(range.split('-')[0]);
-                let end = parseInt(range.split('-')[1]);
+                let start;
+                let end;
 
+                if (range[1] === '-') {
+                    start = parseInt(range.split('-')[0]);
+                    end = parseInt(range.split('-')[1]);
+                }
+                else {
+                    start = parseInt(range);
+                    end = start + 1;
+                }
+                
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputCellTypes';
                     errorMessage = 'Range out of bounds: please set a valid floor range.';
+                    break;
                 }
 
+                console.log(cellTypes);
                 for (let i = start; i < end; i++) {
                     if (i in cellTypes) {
                         errorInput = '#inputCellTypes';
                         errorMessage = 'Overlapping range: please set a valid floor range.';
+                        break;
                     }
                     cellTypes[i] = cellIndicators[cellTypes[key].toLowerCase()];
                 }
 
                 delete cellTypes[key];
-                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -595,6 +616,7 @@ var sketch = function(p) {
                     cellTypes[floor] = cellTypes[(i - 1).toString()];
                 }
             }
+            $('#inputCellTypes').removeClass('is-invalid');
         }
         else {
             for (let i = 0; i < floors; i++) {
@@ -604,30 +626,52 @@ var sketch = function(p) {
         }
 
         if (inputs['coreCells'].value.length !== 0) {
-            let temp = inputs['coreCells'].value.trim().replace(/ /g, '').split('\n');
+            let temp = inputs['coreCells'].value.trim().replace(/\s/g, '');
+            temp = temp.split('[');
             
             for (let i = 0; i < temp.length; i++) {
-                if (temp[i].trim() !== '') coreCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                if (temp[i].trim() !== '') {
+                    temp[i] = '[' + temp[i];
+                    coreCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                }
             }
 
             for (var key in coreCells) {
                 let range = key.replace(/[[\]]/g, '');
-                
-                let start = parseInt(range.split('-')[0]);
-                let end = parseInt(range.split('-')[1]);
+                let start;
+                let end;
+
+                if (range[1] === '-') {
+                    start = parseInt(range.split('-')[0]);
+                    end = parseInt(range.split('-')[1]);
+                }
+                else {
+                    start = parseInt(range);
+                    end = start + 1;
+                }
 
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputCoreCells';
                     errorMessage = 'Range out of bounds: please set a valid floor range.';
+                    break;
                 }
                 
                 let coreCellList = coreCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');   
                 
                 for (var i = 0; i < coreCellList.length; i++) {
                     coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
-        
-                    for (var j =0; j < coreCellList[i].length; j++) {
-                        coreCellList[i][j] = parseInt(coreCellList[i][j]);
+                    
+                    let coordX = parseInt(coreCellList[i][0]);
+                    let coordY = parseInt(coreCellList[i][1]);
+
+                    if (coordX < 0 || coordX >= gridRows || coordY < 0 || coordY >= gridCols) {
+                        errorInput = '#inputCoreCells';
+                        errorMessage = 'Coordinates are out of range.';
+                        break;
+                    }
+                    else {
+                        coreCellList[i][0] = coordX;
+                        coreCellList[i][1] = coordY;
                     }
                 }
                 
@@ -635,12 +679,12 @@ var sketch = function(p) {
                     if (i in coreCells) {
                         errorInput = '#inputCoreCells';
                         errorMessage = 'Overlapping range: please set a valid floor range.';
+                        break;
                     }
                     coreCells[i] = coreCellList;
                 }
 
                 delete coreCells[key];
-                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -649,6 +693,7 @@ var sketch = function(p) {
                     coreCells[floor] = [];
                 }
             }
+            $('#inputCoreCells').removeClass('is-invalid');
         }
         else {
             for (let i = 0; i < floors; i++) {
@@ -658,21 +703,34 @@ var sketch = function(p) {
         }
 
         if (inputs['deadCells'].value.length !== 0) {
-            let temp = inputs['deadCells'].value.trim().replace(/ /g, '').split('\n');
+            let temp = inputs['deadCells'].value.trim().replace(/\s/g, '');
+            temp = temp.split('[');
             
             for (let i = 0; i < temp.length; i++) {
-                if (temp[i].trim() !== '') deadCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                if (temp[i].trim() !== '') {
+                    temp[i] = '[' + temp[i];
+                    deadCells[temp[i].split(':')[0]] = temp[i].split(':')[1];
+                }
             }
 
             for (var key in deadCells) {
                 let range = key.replace(/[[\]]/g, '');
-                
-                let start = parseInt(range.split('-')[0]);
-                let end = parseInt(range.split('-')[1]);
+                let start;
+                let end;
+
+                if (range[1] === '-') {
+                    start = parseInt(range.split('-')[0]);
+                    end = parseInt(range.split('-')[1]);
+                }
+                else {
+                    start = parseInt(range);
+                    end = start + 1;
+                }
 
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputDeadCells';
                     errorMessage = 'Range out of bounds: please set a valid floor range.';
+                    break;
                 }
                 
                 let deadCellList = deadCells[key].replace(/\s/g, '').replace(/\)\,/g, ')\n').split('\n');
@@ -680,8 +738,17 @@ var sketch = function(p) {
                 for (var i = 0; i < deadCellList.length; i++) {
                     deadCellList[i] = deadCellList[i].match(/\(([^)]+)\)/)[1].split(',');
         
-                    for (var j =0; j < deadCellList[i].length; j++) {
-                        deadCellList[i][j] = parseInt(deadCellList[i][j]);
+                    let coordX = parseInt(deadCellList[i][0]);
+                    let coordY = parseInt(deadCellList[i][1]);
+
+                    if (coordX < 0 || coordX >= gridRows || coordY < 0 || coordY >= gridCols) {
+                        errorInput = '#inputDeadCells';
+                        errorMessage = 'Coordinates are out of range.';
+                        break;
+                    }
+                    else {
+                        deadCellList[i][0] = coordX;
+                        deadCellList[i][1] = coordY;
                     }
                 }
                 
@@ -689,12 +756,12 @@ var sketch = function(p) {
                     if (i in deadCells) {
                         errorInput = '#inputDeadCells';
                         errorMessage = 'Overlapping range: please set a valid floor range.';
+                        break;
                     }
                     deadCells[i] = deadCellList;
                 }
 
                 delete deadCells[key];
-                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -703,6 +770,7 @@ var sketch = function(p) {
                     deadCells[floor] = [];
                 }
             }
+            $('#inputDeadCells').removeClass('is-invalid');
         }
         else {
             for (let i = 0; i < floors; i++) {
@@ -713,32 +781,48 @@ var sketch = function(p) {
 
         if (inputs['floorFill'].value.length !== 0) {
             let temp = inputs['floorFill'].value.trim().replace(/ /g, '').split('\n');
-            
+
             for (let i = 0; i < temp.length; i++) {
-                if (temp[i].trim() !== '') floorFill[temp[i].split(':')[0]] = temp[i].split(':')[1].replace(/%/, '');
+                if (temp[i].trim() !== '') {
+                    if (temp[i][0] !== '[') {
+                        errorInput = '#inputFloorFill';
+                        errorMessage = 'Rule needs to start with a floor range.';
+                        break;
+                    }
+                    floorFill[temp[i].split(':')[0]] = temp[i].split(':')[1].replace(/\s/, '');
+                }
             }
 
             for (var key in floorFill) {
                 let range = key.replace(/[[\]]/g, '');
-                
-                let start = parseInt(range.split('-')[0]);
-                let end = parseInt(range.split('-')[1]);
+                let start;
+                let end;
+
+                if (range[1] === '-') {
+                    start = parseInt(range.split('-')[0]);
+                    end = parseInt(range.split('-')[1]);
+                }
+                else {
+                    start = parseInt(range);
+                    end = start + 1;
+                }
 
                 if ((start < 0) || (start > floors) || (end < 0) || (end > floors) || (start > end)) {
                     errorInput = '#inputFloorFill';
                     errorMessage = 'Range out of bounds: please set a valid floor range.';
+                    break;
                 }
 
                 for (let i = start; i < end; i++) {
                     if (i in floorFill) {
-                        errorInput = '#inputCellTypes';
+                        errorInput = '#inputFloorFill';
                         errorMessage = 'Overlapping range: please set a valid floor range.';
+                        break;
                     }
                     floorFill[i] = parseInt(floorFill[key]);
                 }
 
                 delete floorFill[key];
-                showError();
             }
 
             for (let i = 0; i < floors; i++) {
@@ -747,6 +831,7 @@ var sketch = function(p) {
                     floorFill[floor] = -1;
                 }
             }
+            $('#inputFloorFill').removeClass('is-invalid');
         }
         else {
             for (let i = 0; i < floors; i++) {
@@ -759,16 +844,22 @@ var sketch = function(p) {
             $('#inputCellTypes').removeClass('is-invalid');
             $('#inputCoreCells').removeClass('is-invalid');
             $('#inputDeadCells').removeClass('is-invalid');
+            $('#inputFloorFill').removeClass('is-invalid');
 
             buildingParameters['cellTypes'] = cellTypes;
             buildingParameters['coreCells'] = coreCells;
             buildingParameters['deadCells'] = deadCells;
             buildingParameters['floorFill'] = floorFill;
 
-            $('#buildingParametersModal').modal('hide');            
+            $('#buildingParametersModal').modal('hide');
+            
+            return 1;
         }
         else {
+            showError();
             buildingParameters = defaultBuildingParameters;
+
+            return -1;
         }
 
         if (invertedPropogation) {
