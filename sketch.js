@@ -959,13 +959,14 @@ var sketch = function(p) {
 
         let mmtom = 1000;
 
+        scadData += 'mult = 2;\n\n';
         scadData += `translate([${(unitSize * cellXYScale * mmtom)/2}, ${(unitSize * cellXYScale * mmtom)/2}, ${(unitSize * cellZScale * mmtom)/2}]) {\n`;
         scadData += `\tscale([${unitSize * cellXYScale * mmtom}, ${unitSize * cellXYScale * mmtom}, ${unitSize * cellZScale * mmtom}]) {\n`;
         for (let layer = 0; layer < automaton.generations.length; layer++) {
             for (let row=0; row < automaton.generations[0].length; row++) {
                 for (let col=0; col < automaton.generations[0][0].length; col++) {
                     if (automaton.generations[layer][row][col] !== 0) {
-                        scadData += `\t\ttranslate([${col}, ${row}, ${layer}]) { cube(1, true); }\n`;
+                        scadData += `\t\ttranslate([${col}, ${row}, ${layer} * mult]) { cube(1, true); }\n`;
                     }
                 }
             }
