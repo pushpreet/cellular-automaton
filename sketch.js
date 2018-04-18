@@ -963,6 +963,7 @@ var sketch = function(p) {
         scadData += `translate([${(unitSize * cellXYScale * mmtom)/2}, ${(unitSize * cellXYScale * mmtom)/2}, ${(unitSize * cellZScale * mmtom)/2}]) {\n`;
         scadData += `\tscale([${unitSize * cellXYScale * mmtom}, ${unitSize * cellXYScale * mmtom}, ${unitSize * cellZScale * mmtom}]) {\n`;
         for (let layer = 0; layer < automaton.generations.length; layer++) {
+            scadData += `\t\t// ***************** Floor ${layer} *****************\n`
             for (let row=0; row < automaton.generations[0].length; row++) {
                 for (let col=0; col < automaton.generations[0][0].length; col++) {
                     if (automaton.generations[layer][row][col] !== 0) {
@@ -970,6 +971,7 @@ var sketch = function(p) {
                     }
                 }
             }
+            scadData += '\n';
         }
         scadData += '\t}\n';
         scadData += '}\n';
