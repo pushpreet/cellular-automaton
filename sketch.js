@@ -50,7 +50,7 @@ var sketch = function(p) {
     var scaledUnitSize;
 
     var cellXYScale = 1;
-    var cellZScale = 1;
+    var cellZScale = 0.25;
 
     let gridRows;
     let gridCols;
@@ -217,7 +217,7 @@ var sketch = function(p) {
         });
 
         $('#cellXYScaleSlider').on("slide", function(slideEvt) {
-            $("#cellXYScaleValue").text("Cell XY Scale: " + slideEvt.value.toPrecision(2) + 'x');
+            $("#cellXYScaleValue").text("Cell XY Scale: " + slideEvt.value.toPrecision(3) + 'x');
             cellXYScale = slideEvt.value.toPrecision(2);
         });
 
@@ -228,7 +228,9 @@ var sketch = function(p) {
         });
 
         $('#cellZScaleSlider').on("slide", function(slideEvt) {
-            $("#cellZScaleValue").text("Cell Z Scale: " + slideEvt.value.toPrecision(2) + 'x');
+            let precision = 2;
+            if (slideEvt.value >= 1) precision = 3;
+            $("#cellZScaleValue").text("Cell Z Scale: " + slideEvt.value.toPrecision(precision) + 'x');
             cellZScale = slideEvt.value.toPrecision(2);
         });
 
