@@ -167,6 +167,8 @@ var sketch = function(p) {
         $("#dropdownImport label").click( function(e) {
             var selText = $(this).text();
             if (selText === 'SCAD') inputHandler = importSCAD;
+            else if (selText === 'Building Parameters') inputHandler = importBuildingParameters;
+            else if (selText === 'State') inputHandler = importState;
         });
 
         document.getElementById('file-input').addEventListener('change', readSingleFile, false);
@@ -970,7 +972,7 @@ var sketch = function(p) {
 
         var pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(layerData));
-        pom.setAttribute('download', ruleset + '-' + getFormattedDate() + '.txt');
+        pom.setAttribute('download', 'layers_' + ruleset + '_' + getFormattedDate() + '.txt');
 
         if (document.createEvent) {
             var event = document.createEvent('MouseEvents');
@@ -1012,7 +1014,7 @@ var sketch = function(p) {
 
         var pom = document.createElement('a');
         pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(scadData));
-        pom.setAttribute('download', ruleset + '-' + getFormattedDate() + '.scad');
+        pom.setAttribute('download', 'scad_' + ruleset + '_' + getFormattedDate() + '.scad');
 
         if (document.createEvent) {
             var event = document.createEvent('MouseEvents');
@@ -1025,7 +1027,245 @@ var sketch = function(p) {
     }
 
     function exportState() {
+        var stateData = '';
+        stateData += '// File generated from Cellular Automata simulator.\n';
+        stateData += '// Author: Pushpreet Singh Hanspal.\n';
+        stateData += '// Code: https://github.com/pushpreet/cellular-automaton/\n';
+        stateData += '// Demo: https://pushpreet.github.io/cellular-automaton/\n';
+        stateData += '\n';
+        stateData += '';
 
+        stateData += 'FOOTPRINT-X:\n' + inputs['footprintX'].value.toString() + '\n\n';
+        stateData += 'FOOTPRINT-Y:\n' + inputs['footprintY'].value.toString() + '\n\n';
+        stateData += 'UNIT-SIZE:\n' + inputs['unitSize'].value.toString() + '\n\n';
+
+        stateData += 'FLOORS:\n' + floors.toString() + '\n\n';
+        stateData += 'CELL-TYPES:\n' + inputs['cellTypes'].value + '\n\n';
+        stateData += 'CORE-CELLS:\n' + inputs['coreCells'].value + '\n\n';
+        stateData += 'DEAD-CELLS:\n' + inputs['deadCells'].value + '\n\n';
+        stateData += 'FLOOR-FILL:\n' + inputs['floorFill'].value + '\n\n';
+
+        stateData += 'INITIAL-GENERATION:\n' + $("#buttonInitialGeneration").text() + '\n\n';
+
+        stateData += 'RULESET:\n' + $("#buttonRuleset").text() + '\n\n';
+        
+        if ($("#buttonRuleset").text() === 'custom') {
+            stateData += 'BIRTH:\n' + inputs['birthConditions'].value + '\n';
+            stateData += 'DEATH:\n' + inputs['birthConditions'].value + '\n\n';
+        }
+
+        stateData += 'BUILDING:\n';
+        for (let layer = 0; layer < automaton.generations.length; layer++) {
+            for (let row=0; row < automaton.generations[0].length; row++) {
+                for (let col=0; col < automaton.generations[0][0].length; col++) {
+                    if (automaton.generations[layer][row][col] !== 0) {
+                        stateData += `[${row}, ${col}, ${layer}]\n`;
+                    }
+                }
+            }
+        }
+
+        var pom = document.createElement('a');
+        pom.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(stateData));
+        pom.setAttribute('download', 'state_' + ruleset + '_' + getFormattedDate() + '.txt');
+
+        if (document.createEvent) {
+            var event = document.createEvent('MouseEvents');
+            event.initEvent('click', true, true);
+            pom.dispatchEvent(event);
+        }
+        else {
+            pom.click();
+        }
+    }
+
+    function importBuildingParameters(fileContents) {
+        var _footprintX, _foorprintY, _unitSize, _floors, _cellTypes, _coreCells, _deadCells, _floorFill, _initialGeneration, _ruleset, _building;
+        let indexes = new Array(11);
+        
+        indexes[0] = fileContents.indexOf('FOOTPRINT-X');
+        indexes[1] = fileContents.indexOf('FOOTPRINT-Y');
+        indexes[2] = fileContents.indexOf('UNIT-SIZE');
+        indexes[3] = fileContents.indexOf('FLOORS');
+        indexes[4] = fileContents.indexOf('CELL-TYPES');
+        indexes[5] = fileContents.indexOf('CORE-CELLS');
+        indexes[6] = fileContents.indexOf('DEAD-CELLS');
+        indexes[7] = fileContents.indexOf('FLOOR-FILL');
+        indexes[8] = fileContents.indexOf('INITIAL-GENERATION');
+        indexes[9] = fileContents.indexOf('RULESET');
+        indexes[10] = fileContents.indexOf('BUILDING');
+
+        for (let i = 0; i < indexes.length; i++) {
+            if (indexes[i] === -1) {
+                showAlert('danger', 'Incorrect File.');
+                return -1;
+            }
+        }
+
+        _footprintX = fileContents.slice(indexes[0] + 'FOOTPRINT-X'.length + 2, indexes[1] - 2);
+        _footprintY = fileContents.slice(indexes[1] + 'FOOTPRINT-Y'.length + 2, indexes[2] - 2);
+        _unitSize = fileContents.slice(indexes[2] + 'UNIT-SIZE'.length + 2, indexes[3] - 2);
+        _floors = fileContents.slice(indexes[3] + 'FLOORS'.length + 2, indexes[4] - 2);
+        _cellTypes = fileContents.slice(indexes[4] + 'CELL-TYPES'.length + 2, indexes[5] - 2);
+        _coreCells = fileContents.slice(indexes[5] + 'CORE-CELLS'.length + 2, indexes[6] - 2);
+        _deadCells = fileContents.slice(indexes[6] + 'DEAD-CELLS'.length + 2, indexes[7] - 2);
+        _floorFill = fileContents.slice(indexes[7] + 'FLOOR-FILL'.length + 2, indexes[8] - 2);
+        _initialGeneration = fileContents.slice(indexes[8] + 'INITIAL-GENERATION'.length + 2, indexes[9] - 2);
+        _ruleset = fileContents.slice(indexes[9] + 'RULESET'.length + 2, indexes[10] - 2).split('\n')[0];
+        _building = fileContents.slice(indexes[10] + 'BUILDING'.length + 2, fileContents.length).split('\n');
+
+        inputs['footprintX'].value = _footprintX;
+        inputs['footprintY'].value = _footprintY;
+        inputs['unitSize'].value = _unitSize;
+        inputs['floors'].value = _floors;
+        inputs['cellTypes'].value = _cellTypes;
+        inputs['coreCells'].value = _coreCells;
+        inputs['deadCells'].value = _deadCells;
+        inputs['floorFill'].value = _floorFill;
+        $("#buttonInitialGeneration").text(_initialGeneration);
+        $("#buttonRuleset").text(_ruleset);
+        
+        if (_ruleset === 'custom') {
+            let _birth = fileContents.slice(fileContents.indexOf('BIRTH') + 'BIRTH'.length + 2, fileContents.indexOf('DEATH') - 1);
+            let _death = fileContents.slice(fileContents.indexOf('DEATH') + 'DEATH'.length + 2, indexes[10] - 2);
+
+            inputs['birthConditions'].value = _birth;
+            inputs['deathConditions'].value = _death;
+        }
+
+        buttons['setGrid'].value = 'Set Grid';
+        setGridParameters();
+        setGrid();
+        buttons['setInitial'].value = 'Set Initial Parameters';
+        setInitialParameters();
+
+        var floorData = new Array(gridRows);
+        for (let row = 0; row < gridRows; row++) {
+            floorData[row] = new Array(gridCols);
+            for (let col = 0; col < gridCols; col++) {
+                floorData[row][col] = 0;
+            }
+        }
+
+        for (let line = 0; line < _building.length; line++) {
+            if (_building[line] !== '') {
+                let coords = _building[line].slice(1, -1).split(',');
+            
+                let floor = parseInt(coords[2].trim());
+                let col = parseInt(coords[1].trim());
+                let row = parseInt(coords[0].trim());
+
+                if (floor > 0) break;
+                
+                floorData[row][col] = buildingParameters['cellTypes'][floor][0];
+            }
+        }
+
+        let coreCells = buildingParameters['coreCells'][0];
+        for (let i = 0; i < coreCells.length; i++) {
+            floorData[coreCells[i][0]][coreCells[i][1]] = buildingParameters['cellTypes'][0][1];
+        }
+
+        automaton.generations = [floorData];
+        renderedLayerEnd = 1;
+    }
+
+    function importState(fileContents) {
+        var _footprintX, _foorprintY, _unitSize, _floors, _cellTypes, _coreCells, _deadCells, _floorFill, _initialGeneration, _ruleset, _building;
+        let indexes = new Array(11);
+        
+        indexes[0] = fileContents.indexOf('FOOTPRINT-X');
+        indexes[1] = fileContents.indexOf('FOOTPRINT-Y');
+        indexes[2] = fileContents.indexOf('UNIT-SIZE');
+        indexes[3] = fileContents.indexOf('FLOORS');
+        indexes[4] = fileContents.indexOf('CELL-TYPES');
+        indexes[5] = fileContents.indexOf('CORE-CELLS');
+        indexes[6] = fileContents.indexOf('DEAD-CELLS');
+        indexes[7] = fileContents.indexOf('FLOOR-FILL');
+        indexes[8] = fileContents.indexOf('INITIAL-GENERATION');
+        indexes[9] = fileContents.indexOf('RULESET');
+        indexes[10] = fileContents.indexOf('BUILDING');
+
+        for (let i = 0; i < indexes.length; i++) {
+            if (indexes[i] === -1) {
+                showAlert('danger', 'Incorrect File.');
+                return -1;
+            }
+        }
+
+        _footprintX = fileContents.slice(indexes[0] + 'FOOTPRINT-X'.length + 2, indexes[1] - 2);
+        _footprintY = fileContents.slice(indexes[1] + 'FOOTPRINT-Y'.length + 2, indexes[2] - 2);
+        _unitSize = fileContents.slice(indexes[2] + 'UNIT-SIZE'.length + 2, indexes[3] - 2);
+        _floors = fileContents.slice(indexes[3] + 'FLOORS'.length + 2, indexes[4] - 2);
+        _cellTypes = fileContents.slice(indexes[4] + 'CELL-TYPES'.length + 2, indexes[5] - 2);
+        _coreCells = fileContents.slice(indexes[5] + 'CORE-CELLS'.length + 2, indexes[6] - 2);
+        _deadCells = fileContents.slice(indexes[6] + 'DEAD-CELLS'.length + 2, indexes[7] - 2);
+        _floorFill = fileContents.slice(indexes[7] + 'FLOOR-FILL'.length + 2, indexes[8] - 2);
+        _initialGeneration = fileContents.slice(indexes[8] + 'INITIAL-GENERATION'.length + 2, indexes[9] - 2);
+        _ruleset = fileContents.slice(indexes[9] + 'RULESET'.length + 2, indexes[10] - 2).split('\n')[0];
+        _building = fileContents.slice(indexes[10] + 'BUILDING'.length + 2, fileContents.length).split('\n');
+
+        inputs['footprintX'].value = _footprintX;
+        inputs['footprintY'].value = _footprintY;
+        inputs['unitSize'].value = _unitSize;
+        inputs['floors'].value = _floors;
+        inputs['cellTypes'].value = _cellTypes;
+        inputs['coreCells'].value = _coreCells;
+        inputs['deadCells'].value = _deadCells;
+        inputs['floorFill'].value = _floorFill;
+        $("#buttonInitialGeneration").text(_initialGeneration);
+        $("#buttonRuleset").text(_ruleset);
+        
+        if (_ruleset === 'custom') {
+            let _birth = fileContents.slice(fileContents.indexOf('BIRTH') + 'BIRTH'.length + 2, fileContents.indexOf('DEATH') - 1);
+            let _death = fileContents.slice(fileContents.indexOf('DEATH') + 'DEATH'.length + 2, indexes[10] - 2);
+
+            inputs['birthConditions'].value = _birth;
+            inputs['deathConditions'].value = _death;
+        }
+
+        buttons['setGrid'].value = 'Set Grid';
+        setGridParameters();
+        setGrid();
+        buttons['setInitial'].value = 'Set Initial Parameters';
+        setInitialParameters();
+
+        var floorData = new Array(floors);
+        for (let floor = 0; floor < floors; floor++) {
+            floorData[floor] = new Array(gridRows);
+            for (let row = 0; row < gridRows; row++) {
+                floorData[floor][row] = new Array(gridCols);
+
+                for (let col = 0; col < gridCols; col++) {
+                    floorData[floor][row][col] = 0;
+                }
+            }
+        }
+
+        for (let line = 0; line < _building.length; line++) {
+            if (_building[line] !== '') {
+                let coords = _building[line].slice(1, -1).split(',');
+            
+                let floor = parseInt(coords[2].trim());
+                let col = parseInt(coords[1].trim());
+                let row = parseInt(coords[0].trim());
+                
+                floorData[floor][row][col] = buildingParameters['cellTypes'][floor][0];
+            }
+        }
+
+        for (let floor = 0; floor < floorData.length; floor++) {
+            let coreCells = buildingParameters['coreCells'][floor];
+            for (let i = 0; i < coreCells.length; i++) {
+                floorData[floor][coreCells[i][0]][coreCells[i][1]] = buildingParameters['cellTypes'][floor][1];
+            }
+        }
+
+        automaton.generations = floorData;
+        renderedLayerEnd = floors;
+
+        buttons['propagate'].value = 'Propagate';
+        propagate();
     }
 
     function importSCAD(fileContents) {
