@@ -86,6 +86,8 @@ var sketch = function(p) {
 
     let manualInitialGeneration;
 
+    var inputHandler;
+
     p.setup = function() {
         p.pixelDensity(1);
 
@@ -162,11 +164,12 @@ var sketch = function(p) {
             $("#buttonInitialGeneration").text(selText);
         });
 
-        $("#dropdownImport button").click( function(e) {
-            e.preventDefault(); // cancel the link behaviour
+        $("#dropdownImport label").click( function(e) {
             var selText = $(this).text();
-            if (selText === 'SCAD') importSCAD();
+            if (selText === 'SCAD') inputHandler = importSCAD;
         });
+
+        document.getElementById('file-input').addEventListener('change', readSingleFile, false);
 
         $("#dropdownExport button").click( function(e) {
             e.preventDefault(); // cancel the link behaviour
@@ -1007,6 +1010,76 @@ var sketch = function(p) {
 
     function exportState() {
 
+    }
+
+    function importSCAD(fileContents) {
+        if (buttons['setInitial'].value !== 'Change Initial Parameters') {
+            showAlert('danger', 'Please set the initial parameters first.')
+            return -1;
+        }
+
+        automaton.generations = [];
+
+        fileContents = fileContents.split('\n');
+
+        var floorData = new Array(floors);
+        for (let floor = 0; floor < floors; floor++) {
+            floorData[floor] = new Array(gridRows);
+            for (let row = 0; row < gridRows; row++) {
+                floorData[floor][row] = new Array(gridCols);
+
+                for (let col = 0; col < gridCols; col++) {
+                    floorData[floor][row][col] = 0;
+                }
+            }
+        }
+
+        for (let line = 0; line < fileContents.length; line++) {
+            if (fileContents[line].indexOf('cube') >= 0) {
+                let coords = fileContents[line].match(/\[.+?\]/)[0].replace(' * mult', '').slice(1, -1).split(',');
+
+                let floor = parseInt(coords[2].trim());
+                let row = parseInt(coords[1].trim());
+                let col = parseInt(coords[0].trim());
+                
+                floorData[floor][row][col] = buildingParameters['cellTypes'][floor][0];
+            }
+        }
+
+        for (let floor = 0; floor < floorData.length; floor++) {
+            let coreCells = buildingParameters['coreCells'][floor];
+            for (let i = 0; i < coreCells.length; i++) {
+                floorData[floor][coreCells[i][0]][coreCells[i][1]] = buildingParameters['cellTypes'][floor][1];
+            }
+        }
+
+        automaton.generations = floorData;
+        renderedLayerEnd = floors;
+
+        buttons['propagate'].value = 'Reset';
+        $("#floorSliderValue").text("Floor: " + floors);
+        $('#floorSlider').bootstrapSlider({max: floors, value: floors});
+        $('#floorSlider').bootstrapSlider("enable");
+        $("#dropdownExport button[value='2']").prop('disabled', false);
+        $("#dropdownExport button[value='3']").prop('disabled', false);
+        $('#buttonRuleset').prop('disabled', true);
+        $('#inputWraparound').prop('disabled', true);
+        $('#buttonSetCustomRuleset').prop('disabled', true);
+        $('#buttonSetInitial').prop('disabled', true);
+    }
+
+    function readSingleFile(e) {
+        var file = e.target.files[0];
+        if (!file) {
+            return;
+        }
+        var reader = new FileReader();
+        reader.onload = function(e) {
+            var contents = e.target.result;
+            // Display file content
+            inputHandler(contents);
+        };
+        reader.readAsText(file);
     }
 
     function getFormattedDate() {
