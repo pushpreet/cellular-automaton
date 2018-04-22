@@ -679,8 +679,8 @@ var sketch = function(p) {
                 for (var i = 0; i < coreCellList.length; i++) {
                     coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
                     
-                    let coordX = parseInt(coreCellList[i][0]);
-                    let coordY = parseInt(coreCellList[i][1]);
+                    let coordX = parseInt(coreCellList[i][1]);
+                    let coordY = parseInt(coreCellList[i][0]);
 
                     if (coordX < 0 || coordX >= gridRows || coordY < 0 || coordY >= gridCols) {
                         errorInput = '#inputCoreCells';
@@ -756,8 +756,8 @@ var sketch = function(p) {
                 for (var i = 0; i < deadCellList.length; i++) {
                     deadCellList[i] = deadCellList[i].match(/\(([^)]+)\)/)[1].split(',');
         
-                    let coordX = parseInt(deadCellList[i][0]);
-                    let coordY = parseInt(deadCellList[i][1]);
+                    let coordX = parseInt(deadCellList[i][1]);
+                    let coordY = parseInt(deadCellList[i][0]);
 
                     if (coordX < 0 || coordX >= gridRows || coordY < 0 || coordY >= gridCols) {
                         errorInput = '#inputDeadCells';
