@@ -1,5 +1,5 @@
-var plotSizeX;
-var plotSizeY;
+var footprintX;
+var footprintY;
 var unitSize;
 var floors;  
 var wraparound;
@@ -45,8 +45,8 @@ var sketch = function(p) {
     let _bottom;
     let gridTopLeft;
 
-    var scaledPlotSizeX;
-    var scaledPlotSizeY;
+    var scaledFootprintX;
+    var scaledFootprintY;
     var scaledUnitSize;
 
     var cellXYScale = 1;
@@ -110,8 +110,8 @@ var sketch = function(p) {
         easycam.setDistanceMin(500);
         easycam.setDistanceMax(2500);
 
-        inputs['plotWidth'] = document.getElementById('inputPlotWidth');
-        inputs['plotLength'] = document.getElementById('inputPlotLength');
+        inputs['footprintY'] = document.getElementById('inputFootprintY');
+        inputs['footprintX'] = document.getElementById('inputFootprintX');
         inputs['unitSize'] = document.getElementById('inputUnitSize');
         inputs['floors'] = document.getElementById('inputFloors');
         inputs['wraparound'] = document.getElementById('inputWraparound');
@@ -176,7 +176,7 @@ var sketch = function(p) {
             var selText = $(this).text();
             if (selText === 'Current State') exportState();
             else if (selText === 'Layers') exportLayers();
-            else if (selText === 'SCAD') exportCAD();
+            else if (selText === 'SCAD') exportSCAD();
         });
 
         $("#dropdownExport button[value='2']").prop('disabled', true);
@@ -275,8 +275,8 @@ var sketch = function(p) {
 
         if (initialGenerationSet) {
             gridTopLeft = p.createVector(
-                (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-                (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+                (_left + _right)/2 - scaledFootprintX/2 + scaledUnitSize/2,
+                (_top + _bottom)/2 - scaledFootprintY/2 + scaledUnitSize/2,
                 scaledUnitSize/2
             );
         }
@@ -346,25 +346,25 @@ var sketch = function(p) {
     }
 
     function setGridParameters() {
-        plotSizeX = parseInt(inputs['plotWidth'].value);
-        plotSizeY = parseInt(inputs['plotLength'].value);
+        footprintX = parseInt(inputs['footprintX'].value);
+        footprintY = parseInt(inputs['footprintY'].value);
         unitSize = parseInt(inputs['unitSize'].value);
 
-        let scale = ((((canvasSizeX - mainWindowPadding*2)/plotSizeX) < ((canvasSizeY - mainWindowPadding*2)/plotSizeY)) ? 
-                    ((canvasSizeX - mainWindowPadding*2)/plotSizeX) : ((canvasSizeY - mainWindowPadding*2)/plotSizeY));
+        let scale = ((((canvasSizeX - mainWindowPadding*2)/footprintX) < ((canvasSizeY - mainWindowPadding*2)/footprintY)) ? 
+                    ((canvasSizeX - mainWindowPadding*2)/footprintX) : ((canvasSizeY - mainWindowPadding*2)/footprintY));
 
-        scaledPlotSizeX = plotSizeX * scale;
-        scaledPlotSizeY = plotSizeY * scale;
+        scaledFootprintX = footprintX * scale;
+        scaledFootprintY = footprintY * scale;
         scaledUnitSize = unitSize * scale;
 
         gridTopLeft = p.createVector(
-            (_left + _right)/2 - scaledPlotSizeX/2 + scaledUnitSize/2,
-            (_top + _bottom)/2 - scaledPlotSizeY/2 + scaledUnitSize/2,
+            (_left + _right)/2 - scaledFootprintX/2 + scaledUnitSize/2,
+            (_top + _bottom)/2 - scaledFootprintY/2 + scaledUnitSize/2,
             scaledUnitSize/2
         );
 
-        gridRows = plotSizeX / unitSize;
-        gridCols = plotSizeY / unitSize;
+        gridRows = footprintX / unitSize;
+        gridCols = footprintY / unitSize;
     }
 
     function setGrid() {
@@ -373,8 +373,8 @@ var sketch = function(p) {
         if (buttons['setGrid'].value === 'Set Grid') {
             buttons['setGrid'].value = 'Reset Grid';
 
-            $('#inputPlotWidth').prop('disabled', true);
-            $('#inputPlotLength').prop('disabled', true);
+            $('#inputFootprintY').prop('disabled', true);
+            $('#inputFootprintX').prop('disabled', true);
             $('#inputUnitSize').prop('disabled', true);
 
             $('#buttonSetInitial').prop('disabled', false);
@@ -382,12 +382,28 @@ var sketch = function(p) {
         else if (buttons['setGrid'].value === 'Reset Grid') {
             buttons['setGrid'].value = 'Set Grid';
 
-            $('#inputPlotWidth').prop('disabled', false);
-            $('#inputPlotLength').prop('disabled', false);
+            $('#inputFootprintY').prop('disabled', false);
+            $('#inputFootprintX').prop('disabled', false);
             $('#inputUnitSize').prop('disabled', false);
 
             $('#buttonSetInitial').prop('disabled', true);
             $('#buttonPropagate').prop('disabled', true);
+
+            buttons['setInitial'].value = 'Set Initial Parameters';
+            $('#buttonSetBuildingParameters').prop('disabled', false);
+            $('#inputInvertedPropogation').prop('disabled', false);
+            $('#buttonInitialGeneration').prop('disabled', false);
+            
+            buttons['propagate'].value = 'Propagate';
+            $('#floorSlider').bootstrapSlider({max: 1, value: 1});
+            $('#floorSlider').bootstrapSlider("disable");
+            $("#dropdownExport button[value='2']").prop('disabled', true);
+            $("#dropdownExport button[value='3']").prop('disabled', true);
+            $('#buttonRuleset').prop('disabled', false);
+            $('#inputWraparound').prop('disabled', false);
+            if ($('#buttonRuleset').text() === 'custom') {
+                $("#buttonSetCustomRuleset").prop('disabled', false);
+            }
         }
     }
 
@@ -679,8 +695,8 @@ var sketch = function(p) {
                 for (var i = 0; i < coreCellList.length; i++) {
                     coreCellList[i] = coreCellList[i].match(/\(([^)]+)\)/)[1].split(',');
                     
-                    let coordX = parseInt(coreCellList[i][1]);
-                    let coordY = parseInt(coreCellList[i][0]);
+                    let coordX = parseInt(coreCellList[i][0]);
+                    let coordY = parseInt(coreCellList[i][1]);
 
                     if (coordX < 0 || coordX >= gridRows || coordY < 0 || coordY >= gridCols) {
                         errorInput = '#inputCoreCells';
@@ -756,8 +772,8 @@ var sketch = function(p) {
                 for (var i = 0; i < deadCellList.length; i++) {
                     deadCellList[i] = deadCellList[i].match(/\(([^)]+)\)/)[1].split(',');
         
-                    let coordX = parseInt(deadCellList[i][1]);
-                    let coordY = parseInt(deadCellList[i][0]);
+                    let coordX = parseInt(deadCellList[i][0]);
+                    let coordY = parseInt(deadCellList[i][1]);
 
                     if (coordX < 0 || coordX >= gridRows || coordY < 0 || coordY >= gridCols) {
                         errorInput = '#inputDeadCells';
@@ -966,7 +982,7 @@ var sketch = function(p) {
         }
     }
 
-    function exportCAD() {
+    function exportSCAD() {
         var scadData = '';
         scadData += '// SCAD file generated from Cellular Automata simulator.\n';
         scadData += '// Author: Pushpreet Singh Hanspal.\n';
@@ -985,7 +1001,7 @@ var sketch = function(p) {
             for (let row=0; row < automaton.generations[0].length; row++) {
                 for (let col=0; col < automaton.generations[0][0].length; col++) {
                     if (automaton.generations[layer][row][col] !== 0) {
-                        scadData += `\t\ttranslate([${col}, ${row}, ${layer} * mult]) { cube(1, true); }\n`;
+                        scadData += `\t\ttranslate([${row}, ${col}, ${layer} * mult]) { cube(1, true); }\n`;
                     }
                 }
             }
@@ -1039,8 +1055,8 @@ var sketch = function(p) {
                 let coords = fileContents[line].match(/\[.+?\]/)[0].replace(' * mult', '').slice(1, -1).split(',');
 
                 let floor = parseInt(coords[2].trim());
-                let row = parseInt(coords[1].trim());
-                let col = parseInt(coords[0].trim());
+                let col = parseInt(coords[1].trim());
+                let row = parseInt(coords[0].trim());
                 
                 floorData[floor][row][col] = buildingParameters['cellTypes'][floor][0];
             }
@@ -1110,26 +1126,28 @@ var sketch = function(p) {
     function drawGrid() {
         p.strokeWeight(2);
 
-        for (let i = 0; i < gridRows + 1; i++) {
-            let x = i * scaledUnitSize;
+        for (let i = 0; i < gridCols + 1; i++) {
+            let y = i * scaledUnitSize;
+
             if (i === 0) p.stroke('#e74c3c');
             else p.stroke('#7f8c8d');
-            p.line((_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 - scaledPlotSizeY/2 - mainWindowPadding/2, 
-                    (_left + _right)/2 - scaledPlotSizeX/2 + x, (_top + _bottom)/2 + scaledPlotSizeY/2 + mainWindowPadding/2);
             
-            verticalLines[i] = (_left + _right)/2 - scaledPlotSizeX/2 + x + p.width/2;
+            p.line((_left + _right)/2 - scaledFootprintY/2 + y, (_top + _bottom)/2 - scaledFootprintX/2 - mainWindowPadding/2, 
+                    (_left + _right)/2 - scaledFootprintY/2 + y, (_top + _bottom)/2 + scaledFootprintX/2 + mainWindowPadding/2);
+            
+            verticalLines[i] = (_left + _right)/2 - scaledFootprintY/2 + y + p.width/2;
         }
 
-        for (let j = 0; j < gridCols + 1; j++) {
-            let y = j * scaledUnitSize;
+        for (let j = 0; j < gridRows + 1; j++) {
+            let x = j * scaledUnitSize;
 
             if (j === 0) p.stroke('#3498db');
             else p.stroke('#7f8c8d');
 
-            p.line((_left + _right)/2 - scaledPlotSizeX/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y, 
-                    (_left + _right)/2 + scaledPlotSizeX/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledPlotSizeY/2 + y);
+            p.line((_left + _right)/2 - scaledFootprintY/2 - mainWindowPadding/2, (_top + _bottom)/2 - scaledFootprintX/2 + x, 
+                    (_left + _right)/2 + scaledFootprintY/2 + mainWindowPadding/2, (_top + _bottom)/2 - scaledFootprintX/2 + x);
 
-            horizontalLines[j] = (_top + _bottom)/2 - scaledPlotSizeY/2 + y + p.height/2;
+            horizontalLines[j] = (_top + _bottom)/2 - scaledFootprintY/2 + x + p.height/2;
         }
     }
 
@@ -1160,7 +1178,7 @@ var sketch = function(p) {
             p.noStroke();
         }
         
-        p.translate(gridTopLeft.x, gridTopLeft.y, (gridTopLeft.z * cellZScale) + (scaledUnitSize * layerStart));
+        p.translate(gridTopLeft.y, gridTopLeft.x, (gridTopLeft.z * cellZScale) + (scaledUnitSize * layerStart));
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {
                 for (let j = 0; j < gridCols; j++) {
@@ -1168,11 +1186,11 @@ var sketch = function(p) {
                         p.ambientMaterial(cellColors[_generations[layer][i][j]]);
                         p.box(scaledUnitSize * cellXYScale, scaledUnitSize * cellXYScale, scaledUnitSize * cellZScale);
                     }
-                    p.translate(0, scaledUnitSize, 0);
+                    p.translate(scaledUnitSize, 0, 0);
                 }
-                p.translate(scaledUnitSize, -gridCols * scaledUnitSize, 0);
+                p.translate(-gridCols * scaledUnitSize, scaledUnitSize, 0);
             }
-            p.translate(-gridRows * scaledUnitSize, 0, scaledUnitSize * cellZScale);
+            p.translate(0, -gridRows * scaledUnitSize, scaledUnitSize * cellZScale);
         }
     }
 }
