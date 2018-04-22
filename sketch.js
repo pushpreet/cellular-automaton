@@ -125,16 +125,12 @@ var sketch = function(p) {
 
         buttons['setInitial'] = document.getElementById('buttonSetInitial');
         buttons['propagate'] = document.getElementById('buttonPropagate');
-        buttons['exportLayers'] = document.getElementById('buttonExportLayers');
-        buttons['exportCAD'] = document.getElementById('buttonExportCAD');
         buttons['saveBuildingParameters'] = document.getElementById('buttonSaveBuildingParameters');
         buttons['saveCustomRuleset'] = document.getElementById('buttonSaveCustomRuleset');
         buttons['setGrid'] = document.getElementById('buttonSetGrid');
 
         buttons['setInitial'].onclick = setInitialParameters;
         buttons['propagate'].onclick = propagate;
-        buttons['exportLayers'].onclick = exportLayers;
-        buttons['exportCAD'].onclick = exportCAD;
         buttons['saveBuildingParameters'].onclick = saveBuildingParameters;
         buttons['saveCustomRuleset'].onclick = saveCustomRuleset;
         buttons['setGrid'].onclick = setGrid;
@@ -165,6 +161,23 @@ var sketch = function(p) {
             var selText = $(this).text();
             $("#buttonInitialGeneration").text(selText);
         });
+
+        $("#dropdownImport button").click( function(e) {
+            e.preventDefault(); // cancel the link behaviour
+            var selText = $(this).text();
+            if (selText === 'SCAD') importSCAD();
+        });
+
+        $("#dropdownExport button").click( function(e) {
+            e.preventDefault(); // cancel the link behaviour
+            var selText = $(this).text();
+            if (selText === 'Current State') exportState();
+            else if (selText === 'Layers') exportLayers();
+            else if (selText === 'SCAD') exportCAD();
+        });
+
+        $("#dropdownExport button[value='2']").prop('disabled', true);
+        $("#dropdownExport button[value='3']").prop('disabled', true);
 
         $('#buttonExportLayers').prop('disabled', true);
 
@@ -458,8 +471,8 @@ var sketch = function(p) {
             $("#floorSliderValue").text("Floor: " + floors);
             $('#floorSlider').bootstrapSlider({max: floors, value: floors});
             $('#floorSlider').bootstrapSlider("enable");
-            $('#buttonExportLayers').prop('disabled', false);
-            $('#buttonExportCAD').prop('disabled', false);
+            $("#dropdownExport button[value='2']").prop('disabled', false);
+            $("#dropdownExport button[value='3']").prop('disabled', false);
             $('#buttonRuleset').prop('disabled', true);
             $('#inputWraparound').prop('disabled', true);
             $('#buttonSetCustomRuleset').prop('disabled', true);
@@ -474,7 +487,8 @@ var sketch = function(p) {
 
             $('#floorSlider').bootstrapSlider({max: 1, value: 1});
             $('#floorSlider').bootstrapSlider("disable");
-            $('#buttonExportLayers').prop('disabled', true);
+            $("#dropdownExport button[value='2']").prop('disabled', true);
+            $("#dropdownExport button[value='3']").prop('disabled', true);
             $('#buttonRuleset').prop('disabled', false);
             $('#inputWraparound').prop('disabled', false);
             if ($('#buttonRuleset').text() === 'custom') {
@@ -599,7 +613,6 @@ var sketch = function(p) {
                     break;
                 }
 
-                console.log(cellTypes);
                 for (let i = start; i < end; i++) {
                     if (i in cellTypes) {
                         errorInput = '#inputCellTypes';
@@ -990,6 +1003,10 @@ var sketch = function(p) {
         else {
             pom.click();
         }
+    }
+
+    function exportState() {
+
     }
 
     function getFormattedDate() {
