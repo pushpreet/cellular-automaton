@@ -1417,7 +1417,7 @@ var sketch = function(p) {
         else {
             p.noStroke();
         }
-        
+
         p.translate(gridTopLeft.y, gridTopLeft.x, (gridTopLeft.z * cellZScale) + (scaledUnitSize * layerStart));
         for (let layer = layerStart; layer < layerEnd; layer++) {
             for (let i = 0; i < gridRows; i++) {
