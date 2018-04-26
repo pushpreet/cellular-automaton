@@ -888,8 +888,6 @@ var sketch = function(p) {
             buildingParameters['floorFill'] = floorFill;
 
             $('#buildingParametersModal').modal('hide');
-            
-            return 1;
         }
         else {
             showError();
