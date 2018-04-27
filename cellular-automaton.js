@@ -285,7 +285,7 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
 
                 if (state === 0 && this.isNeighbourAlive(neighbours, birth))
                     return aliveIndicator;
-                else if (state !== 0 && this.isNeighbourAlive(neighbours, death))
+                else if (state !== 0 && this.isNeighbourAlive(neighbours, death, 'loose'))
                     return 0;
                 else {
                     if (state === 0) return 0;
@@ -391,19 +391,36 @@ function CellularAutomaton(rows, cols, ruleset, wraparound, buildingParameters) 
         return neighbours;
     }
 
-    this.isNeighbourAlive = function(neighbours, comparisonList) {
-        for (let i = 0; i < comparisonList.length; i++) {
-            let allAlive = true;
-            for (let index = 0; index < comparisonList[i].length; index++) {
-                if (parseInt(neighbours[parseInt(comparisonList[i][index]) - 1]) !== 0) continue;
-                else allAlive = false;
+    this.isNeighbourAlive = function(neighbours, comparisonList, matching) {
+        if (typeof(matching) === 'undefined') matching = 'loose';
+
+        if (matching === 'exact') {
+            let exactAlive = true;
+            for (let i = 0; i < 8; i++) {
+                if ((neighbours[i] === 0) && (comparisonList.indexOf((i+1).toString()) === -1)) continue;
+                else if ((neighbours[i] !== 0) && (comparisonList.indexOf((i+1).toString()) !== -1)) continue;
+                else exactAlive = false;
             }
-            if (allAlive) {
+            if (exactAlive) {
                 return true;
             }
-        }
 
-        return false;
+            return false;
+        }
+        else if (matching === 'loose') {
+            for (let i = 0; i < comparisonList.length; i++) {
+                let allAlive = true;
+                for (let index = 0; index < comparisonList[i].length; index++) {
+                    if (parseInt(neighbours[parseInt(comparisonList[i][index]) - 1]) !== 0) continue;
+                    else allAlive = false;
+                }
+                if (allAlive) {
+                    return true;
+                }
+            }
+    
+            return false;
+        }
     }
     
     this.countNeighbours = function(neighbours, cellType) {

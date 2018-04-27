@@ -1057,7 +1057,7 @@ var sketch = function(p) {
         
         if ($("#buttonRuleset").text() === 'custom') {
             stateData += 'BIRTH:\n' + inputs['birthConditions'].value + '\n';
-            stateData += 'DEATH:\n' + inputs['birthConditions'].value + '\n\n';
+            stateData += 'DEATH:\n' + inputs['deathConditions'].value + '\n\n';
         }
 
         stateData += 'BUILDING:\n';
