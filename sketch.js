@@ -194,6 +194,14 @@ var sketch = function(p) {
             scrollLock = false;
         });
 
+        $('#customRulesetModal').on('hidden.bs.modal', function (e) {
+            scrollLock = true;
+        });
+
+        $('#customRulesetModal').on('shown.bs.modal', function (e) {
+            scrollLock = false;
+        });
+
         $("#menu").hover(
             function() {
                 scrollLock = false;
