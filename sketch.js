@@ -13,16 +13,17 @@ var initialGenerationSet = false;
 let scrollLock = true;
 
 var cellColors = {
-    0: '',          // dead
-    1: '#16a085',   // basic
-    2: '#f1c40f',   // residence
-    3: '#f39c12',   // residence-core
-    4: '#3498db',   // office
-    5: '#2980b9',   // office-core
-    6: '#e74c3c',   // commercial
-    7: '#c0392b',   // commercial-core
-    8: '#9b59b6',   // cultural
-    9: '#8e44ad',   // cultural-core
+    0:  '',          // dead
+    1:  '#ecf0f1',//'#16a085',   // basic
+    2:  '#ecf0f1',//'#f1c40f',   // residence
+    3:  '#ecf0f1',//'#f39c12',   // residence-core
+    4:  '#ecf0f1',//'#3498db',   // office
+    5:  '#ecf0f1',//'#2980b9',   // office-core
+    6:  '#ecf0f1',//'#e74c3c',   // commercial
+    7:  '#ecf0f1',//'#c0392b',   // commercial-core
+    8:  '#ecf0f1',//'#9b59b6',   // cultural
+    9:  '#ecf0f1',//'#8e44ad',   // cultural-core
+    10: '#ecf0f1',   // slate
 };
 
 var cellIndicators = {
